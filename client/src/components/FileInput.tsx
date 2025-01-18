@@ -1,6 +1,10 @@
 import { useState } from 'react';
 
-export default function FileInput() {
+interface FileInputProps {
+    onAnalysis: (content: string) => void;
+}
+
+export default function FileInput({ onAnalysis }: FileInputProps) {
     const [error, setError] = useState<string>('');
     const [csvContent, setCsvContent] = useState<string>('');
     const [isDragging, setIsDragging] = useState(false);
@@ -20,6 +24,7 @@ export default function FileInput() {
         reader.onload = (e) => {
             const text = e.target?.result as string;
             setCsvContent(text);
+            onAnalysis(text);
         };
         reader.readAsText(file);
     };
@@ -79,9 +84,9 @@ export default function FileInput() {
                 <div className="text-red-500 text-sm">{error}</div>
             )}
             {csvContent && (
-                <div className="w-full mt-4">
+                <div className="w-full mt-4 ">
                     <h2 className="text-xl mb-2 text-excel-600">CSV Content:</h2>
-                    <pre className="bg-white p-4 rounded-lg border border-excel-300 overflow-x-auto">
+                    <pre className="bg-white p-4 max-h-96 overflow-auto rounded-lg border border-excel-300 overflow-x-auto text-xs">
                         {csvContent}
                     </pre>
                 </div>
