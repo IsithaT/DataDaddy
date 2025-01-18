@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    font-family: Candara, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: Garamond, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
@@ -57,6 +57,18 @@
   }
 
   h1 {
-    @apply text-[3.2em] leading-[1.1] text-excel-900;
+    @apply text-[3.2em] leading-[1.1] text-excel-900 font-bold;
+  }
+
+  .text-excel-600 {
+    color: #217f55;
+  }
+
+  .bg-excel-50 {
+    background-color: #f0faf4;
+  }
+
+  .border-excel-300 {
+    border-color: #4ab785;
   }
 }
