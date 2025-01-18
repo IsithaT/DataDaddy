@@ -3,6 +3,7 @@ import './App.css'
 function App() {
   return (
     <>
+      <h1>AI CSV Analyzer</h1>
     </>
   )
 }
