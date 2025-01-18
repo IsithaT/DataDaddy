@@ -57,7 +57,7 @@ export default function FileInput({ onAnalysis }: FileInputProps) {
     };
 
     return (
-        <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto m-4">
+        <div className="flex flex-col gap-4 w-full">
             <div className="w-full">
                 <label
                     htmlFor="fileInput"

@@ -53,7 +53,7 @@
 
 @layer utilities {
   body {
-    @apply m-0 flex place-items-center min-w-[320px] min-h-[100vh] bg-gradient-to-br from-excel-50 to-excel-100;
+    @apply m-0 min-w-[320px] min-h-screen bg-gradient-to-br from-excel-50 to-excel-100;
   }
 
   h1 {
