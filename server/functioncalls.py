@@ -151,14 +151,21 @@ def modedecimalplaces(data: list) -> int:
         
     modedecimal = Counter(decimalplaces).most_common(1)[0][0]
     return modedecimal
-    
-def getColumnFromCSV(csv_string: str, column_name: str) -> list:
+
+def getFirstColumnFromCSV(csv_string: str) -> list:
     cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')))
-    if column_name in df.columns:
-        return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df[column_name].tolist()]
-    else:
-        raise ValueError(f"Column '{column_name}' not found in CSV")
+    return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df[df.columns[0]].tolist()]
+
+def getFirstRowFromCSV(csv_string: str) -> list:
+    cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')), index_col=0)
+    return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df.iloc[0].tolist()]
+    
+def getFirstColumnFromCSV(csv_string: str) -> list:
+    cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')))
+    return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df[df.columns[0]].tolist()]
 
 def getRowFromCSV(csv_string: str, row_name: str) -> list:
     cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
