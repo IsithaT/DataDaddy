@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from functioncalls import *
 from llm import (
     load_api_key, 
     initialize_client, 
