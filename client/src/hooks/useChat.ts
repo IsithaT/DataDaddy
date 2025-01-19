@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Message, ChatContext, Attachment } from '../types';
+import { Message, ChatContext, MessageAttachment } from '../types';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
@@ -8,7 +8,7 @@ export function useChat() {
     const [context, setContext] = useState<ChatContext>({ messages: [] });
     const [threadId, setThreadId] = useState<string | null>(null);
     const [isTyping, setIsTyping] = useState(false);
-    const [images, setImages] = useState<Attachment[]>([]);
+    const [images, setImages] = useState<MessageAttachment[]>([]);
     const [isImageCarouselOpen, setIsImageCarouselOpen] = useState(false);
 
     useEffect(() => {
@@ -55,9 +55,8 @@ export function useChat() {
         });
 
         socket.on('image_received', (data) => {
-            const newImage: Attachment = {
+            const newImage: MessageAttachment = {
                 url: `data:image/png;base64,${data.image_data}`,
-                caption: 'Data visualization',
                 type: 'image'
             };
             setImages(prev => [...prev, newImage]);
@@ -83,13 +82,18 @@ export function useChat() {
     }, [context.csvContent]);
 
     const handleFileAnalysis = (content: string) => {
-        // Request new thread when file is uploaded
-        setContext(prev => ({
-            ...prev,
+        // Clear existing messages and images
+        setContext({
+            messages: [],
             csvContent: content
-        }));
+        });
+        setImages([]); // Reset images array
+        
+        // Clear existing thread and create new one
+        if (threadId) {
+            socket.emit('clear_thread', { thread_id: threadId });
+        }
         socket.emit('create_thread');
-
     };
 
     const handleSendMessage = async (content: string) => {
@@ -114,8 +118,17 @@ export function useChat() {
 
     const clearContext = () => {
         if (!threadId) return;
+        
+        // Preserve CSV content while clearing messages
+        const csvContent = context.csvContent;
+        setContext({ messages: [], csvContent });
+        setImages([]); // Reset images array
+        
+        // Emit clear event to server
         socket.emit('clear_thread', { thread_id: threadId });
-        setImages([]);
+        
+        // Create new thread for fresh conversation
+        socket.emit('create_thread');
     };
 
     return {

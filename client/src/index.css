@@ -29,7 +29,7 @@
     color: #2b9d6a;
   }
 
-  button {
+  button:not([class]) {
     border-radius: 8px;
     border: 1px solid #4ab785;
     padding: 0.6em 1.2em;
@@ -41,12 +41,12 @@
     cursor: pointer;
     transition: all 0.25s;
   }
-  button:hover {
+  button:not([class]):hover {
     border-color: #217f55;
     background-color: #217f55;
   }
-  button:focus,
-  button:focus-visible {
+  button:not([class]):focus,
+  button:not([class]):focus-visible {
     outline: 4px auto #7ed3aa;
   }
 }
