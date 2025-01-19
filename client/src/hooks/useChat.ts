@@ -12,6 +12,7 @@ export function useChat() {
         socket.on('thread_created', (data) => {
             setThreadId(data.thread_id);
             socket.emit('join_thread', { thread_id: data.thread_id });
+            socket.emit('send_csv', context.csvContent)
         });
 
         socket.on('message_received', (data) => {
