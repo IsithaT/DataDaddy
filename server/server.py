@@ -137,7 +137,8 @@ def handle_send_message(data):
                     "getColumnInfo": getColumnInfo,
                     "searchValue": searchValue,
                     "searchRowDetails": searchRowDetails,  # Add the new search function
-                    "bargraphToImage": bargraphToImage,  # Add the new graph function
+                    "bargraphToImage": bargraphToImage,
+                    "piechartToImage": piechartToImage,  # Add the new graph function
                 }
 
                 # Process each tool call and collect outputs

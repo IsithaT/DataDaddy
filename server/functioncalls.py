@@ -144,24 +144,51 @@ def histoToImage(
     return buf.getvalue()
 
 
-def piechartToImage(data: dict, title: str) -> bytes:
+def piechartToImage(colName: str, title: str) -> None:
+    """
+    Generates a pie chart image from the provided column data and emits the image via WebSocket to all clients.
+
+    Args:
+        colName: Column name to retrieve data from the CSV file.
+        title: Title of the chart.
+
+    Emits the generated pie chart image as Base64-encoded PNG data to all connected clients.
+    """
     try:
-        plt.figure()
+        # Retrieve and organize the data based on the column name
+        data = organizeDataCount(getColumnFromCSV(csv, colName))
+        
+        # Extract labels and values from the data
         labels = data.keys()
         sizes = data.values()
+        
+        # Create a new figure for the pie chart
+        plt.figure()
         plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
         plt.axis('equal')
         plt.title(title)
         
+        # Save to buffer
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
-        data = buf.getvalue()
+        
+        # Convert to base64
+        encoded_image = base64.b64encode(buf.getvalue()).decode('utf-8')
+        
+        # Cleanup
+        plt.close('all')
         buf.close()
-        plt.close('all')
-        return data
+        
+        # Emit the image
+        emit('image_received',
+             {'image_data': encoded_image, 'format': 'png'},
+             broadcast=True)
+    except Exception as e:
+        print(f"Error generating pie chart: {str(e)}")
+        emit('error', {'msg': f"Error generating pie chart: {str(e)}"})
     finally:
-        plt.close('all')
+        plt.close('all')  # Ensure all figures are closed
 
 
 def scatterplotToImage(

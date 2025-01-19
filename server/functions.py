@@ -203,4 +203,27 @@ AItools = [
             "strict": True,
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "piechartToImage",
+            "description": "Generates a pie chart visualization from a column of data, showing the proportion of each unique value. The chart is automatically emitted to all connected clients.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "colName": {
+                        "type": "string",
+                        "description": "The name of the column to visualize"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the pie chart"
+                    }
+                },
+                "required": ["colName", "title"],
+                "additionalProperties": False
+            },
+            "strict": True
+        }
+    }
 ]
