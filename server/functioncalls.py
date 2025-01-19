@@ -37,6 +37,22 @@ def calculateMean(colName: str, exclude_outliers: bool = False) -> float | str:
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
+def calculateMeanfromList(data: list, exclude_outliers: bool = False) -> float | str:
+    try:
+        numeric_data = [float(x) for x in data]
+        if exclude_outliers:
+            # Calculate IQR and bounds
+            q1 = np.percentile(numeric_data, 25)
+            q3 = np.percentile(numeric_data, 75)
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            # Filter outliers
+            filtered_data = [x for x in numeric_data if lower_bound <= x <= upper_bound]
+            return sum(filtered_data) / len(filtered_data)
+        return sum(numeric_data) / len(numeric_data)
+    except (ValueError, TypeError):
+        return f"Error: List contains non-numeric values"
 
 def calculateMedian(colName: str) -> float | str:
     data = getColumnFromCSV(csv, colName)
@@ -53,6 +69,19 @@ def calculateMedian(colName: str) -> float | str:
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
+def calculateMedianfromList(data: list) -> float | str:
+    try:
+        numeric_data = [float(x) for x in data]
+        numeric_data.sort()
+        if len(numeric_data) % 2 == 0:
+            return (
+                numeric_data[len(numeric_data) // 2]
+                + numeric_data[len(numeric_data) // 2 - 1]
+            ) / 2
+        else:
+            return numeric_data[len(numeric_data) // 2]
+    except (ValueError, TypeError):
+        return f"Error: List contains non-numeric values"
 
 def calculateMode(colName: str) -> str:
     data = getColumnFromCSV(csv, colName)
@@ -76,6 +105,26 @@ def calculateMode(colName: str) -> str:
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
+def calculateModefromList(data: list) -> str:
+    try:
+        numeric_data = [float(x) for x in data]
+        # Get frequency of each value
+        frequencies = Counter(numeric_data)
+        max_freq = max(frequencies.values())
+
+        # Find all values that appear with maximum frequency
+        modes = [x for x, freq in frequencies.items() if freq == max_freq]
+
+        # Handle different cases
+        if max_freq == 1:
+            return "No mode - all values appear once"
+        elif len(modes) == 1:
+            return str(modes[0])
+        else:
+            return f"Multiple modes: {', '.join(str(m) for m in sorted(modes))}"
+
+    except (ValueError, TypeError):
+        return f"Error: List contains non-numeric values"
 
 def calculateVariance(colName: str) -> float | str:
     data = getColumnFromCSV(csv, colName)
@@ -86,6 +135,13 @@ def calculateVariance(colName: str) -> float | str:
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
+def calculateVariancefromList(data: list) -> float | str:
+    try:
+        numeric_data = [float(x) for x in data]
+        mean = sum(numeric_data) / len(numeric_data)
+        return sum((x - mean) ** 2 for x in numeric_data) / len(numeric_data)
+    except (ValueError, TypeError):
+        return f"Error: List contains non-numeric values"
 
 def calculateStandardDeviation(colName: str) -> float | str:
     data = getColumnFromCSV(csv, colName)
@@ -95,6 +151,12 @@ def calculateStandardDeviation(colName: str) -> float | str:
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
+def calculateStandardDeviationfromList(data: list) -> float | str:
+    try:
+        variance = calculateVariancefromList(data)
+        return variance**0.5
+    except (ValueError, TypeError):
+        return f"Error: List contains non-numeric values"
 
 # likely delete lol
 def graphDisplay(data: list) -> str:
@@ -420,6 +482,59 @@ def bargraphToImage(colName: str, xaxis: str, yaxis: str, title: str) -> str:
     finally:
         plt.close("all")  # Ensure all figures are closed
 
+def bargraphToImagefromList(data: list, xaxis: str, yaxis: str, title: str) -> str:
+    """
+    Generates a bar graph image from the provided data and emits the image via WebSocket to all clients.
+
+    Args:
+        data: Dictionary containing the data to be plotted (x: labels, y: values).
+        xaxis: Label for the x-axis.
+        yaxis: Label for the y-axis.
+        title: Title of the graph.
+
+    Returns:
+        str: A message indicating success or failure of the operation.
+    """
+    try:
+        data = organizeDataCount(data)
+
+        # Create a new figure for each plot
+        plt.figure()
+
+        labels = data.keys()
+        values = data.values()
+        plt.bar(labels, values, color=(33 / 255, 127 / 255, 85 / 255))
+        plt.xlabel(xaxis)
+        plt.ylabel(yaxis)
+        plt.title(title)
+
+        # Save to buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+
+        # Convert to base64
+        encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+        # Cleanup
+        plt.close("all")
+        buf.close()
+
+        # Emit the image
+        emit(
+            "image_received",
+            {"image_data": encoded_image, "format": "png"},
+            broadcast=True,
+        )
+
+        return f"Successfully generated and emitted bar graph"
+    except Exception as e:
+        error_msg = f"Error generating bar graph: {str(e)}"
+        print(error_msg)
+        emit("error", {"msg": error_msg})
+        return error_msg
+    finally:
+        plt.close("all")  # Ensure all figures are closed
 
 def plotgraphToImage(
     xdata: list,
