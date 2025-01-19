@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: Candara, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light;
+    color: #184432;
+    background-color: #f5f5f5;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  a {
+    font-weight: 500;
+    color: #217f55;
+    text-decoration: inherit;
+  }
+  a:hover {
+    color: #2b9d6a;
+  }
+
+  button:not([class]) {
+    border-radius: 8px;
+    border: 1px solid #4ab785;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #2b9d6a;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  button:not([class]):hover {
+    border-color: #217f55;
+    background-color: #217f55;
+  }
+  button:not([class]):focus,
+  button:not([class]):focus-visible {
+    outline: 4px auto #7ed3aa;
+  }
+}
+
+@layer utilities {
+  body {
+    @apply m-0 min-w-[320px] min-h-screen bg-[#f5f7f5];
+  }
+
+  h1 {
+    @apply text-[3.2em] leading-[1.1] text-excel-900 font-bold;
+  }
+
+  .text-excel-600 {
+    color: #217f55;
+  }
+
+  .bg-excel-50 {
+    background-color: #f8f8f8;
+  }
+
+  .border-excel-300 {
+    border-color: #4ab785;
+  }
+}
