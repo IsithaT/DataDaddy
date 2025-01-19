@@ -194,7 +194,11 @@ def handle_send_message(data):
             {
                 "thread_id": thread_id,
                 "messages": [
-                    {"role": msg.role, "content": msg.content[0].text.value}
+                    {
+                        "role": msg.role, 
+                        "content": msg.content[0].text.value,
+                        "timestamp": msg.created_at
+                    }
                     for msg in messages.data
                 ],
             },
@@ -258,19 +262,25 @@ def handle_send_csv(data):
         context += f"An example row contains: {dict(zip(headers, dataRow))}\n"
         context += "Please acknowledge this data structure and explain what kind of analysis you can perform based on the column types and content."
 
+        # Create initial message with timestamp
+        initial_timestamp = time.time()
         message = send_message(
             client, thread_id, "I've loaded a CSV file. It is ready to be analyzed."
         )
 
         run = run_assistant(client, thread_id, assistant.id, context)
 
-        # Get and send response
+        # Get and send response with explicit timestamps
         messages = list_messages(client, thread_id)
         emit(
             "message_received",
             {
                 "messages": [
-                    {"role": msg.role, "content": msg.content[0].text.value}
+                    {
+                        "role": msg.role, 
+                        "content": msg.content[0].text.value,
+                        "timestamp": initial_timestamp if msg.role == 'user' else initial_timestamp + 1
+                    }
                     for msg in messages.data
                 ]
             },
