@@ -40,12 +40,25 @@ def calculateMedian(colName: str) -> float | str:
         return f"Error: Column '{colName}' contains non-numeric values"
 
 
-def calculateMode(colName: str) -> float | str:
+def calculateMode(colName: str) -> str:
     data = getColumnFromCSV(csv, colName)
     try:
         numeric_data = [float(x) for x in data]
-        mode = max(set(numeric_data), key=numeric_data.count)
-        return mode
+        # Get frequency of each value
+        frequencies = Counter(numeric_data)
+        max_freq = max(frequencies.values())
+        
+        # Find all values that appear with maximum frequency
+        modes = [x for x, freq in frequencies.items() if freq == max_freq]
+        
+        # Handle different cases
+        if max_freq == 1:
+            return "No mode - all values appear once"
+        elif len(modes) == 1:
+            return str(modes[0])
+        else:
+            return f"Multiple modes: {', '.join(str(m) for m in sorted(modes))}"
+            
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
@@ -287,13 +300,87 @@ def getRowFromCSV(csv_string: str, row_name: str) -> list:
     else:
         raise ValueError(f"Row '{row_name}' not found in CSV")
 
-
-# def countMatchAmount (data: list, match) -> int:
-#     for x in data:
-#         if x == match:
-#             count += 1
-#     return count
-
+def countRowsInCSV(csv_string: str) -> int:
+    cleaned_csv_string = csv_string.rstrip(",")  # Remove trailing comma
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
+    return len(df.index)
 
 def organizeDataCount(data: list) -> dict:
     return dict(Counter(data))
+
+def getColumnInfo(colName: str) -> str:
+    """Get detailed information about a specific column in the CSV data"""
+    cleaned_csv_string = csv.rstrip(",")
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
+    
+    if colName in df.columns:
+        col_data = df[colName]
+        info = f"Column '{colName}' analysis:\n"
+        info += f"- Data type: {col_data.dtype}\n"
+        info += f"- Total values: {len(col_data)}\n"
+        info += f"- Unique values: {len(col_data.unique())}\n"
+        info += f"- Missing values: {col_data.isnull().sum()}\n"
+        if pd.api.types.is_numeric_dtype(col_data):
+            info += f"- Minimum value: {col_data.min()}\n"
+            info += f"- Maximum value: {col_data.max()}\n"
+            info += f"- Average value: {col_data.mean():.2f}\n"
+        else:
+            most_common = col_data.value_counts().head(3)
+            info += "- Most common values:\n"
+            for val, count in most_common.items():
+                info += f"  * {val}: {count} times\n"
+        return info
+    return f"Column '{colName}' not found in the data"
+
+def searchValue(query: str) -> str:
+    """Search for a specific value across all columns in the CSV data"""
+    cleaned_csv_string = csv.rstrip(",")
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
+    
+    results = []
+    for column in df.columns:
+        matches = df[df[column].astype(str).str.contains(str(query), case=False, na=False)]
+        if not matches.empty:
+            unique_matches = matches[column].unique()
+            match_preview = ', '.join([str(x) for x in unique_matches[:3]])
+            if len(unique_matches) > 3:
+                match_preview += f", ... and {len(unique_matches)-3} more"
+            results.append(f"- Column '{column}': {len(matches)} matches found\n"
+                         f"  Example matches: {match_preview}")
+    
+    if results:
+        return f"Search results for '{query}':\n" + "\n".join(results)
+    return f"No matches found for '{query}' in any column"
+
+def searchRowDetails(colName: str, query: str, limit: int = 5) -> str:
+    """Search for rows where a specific column contains the query and return detailed information"""
+    cleaned_csv_string = csv.rstrip(",")
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
+    
+    if colName not in df.columns:
+        return f"Column '{colName}' not found in the data"
+    
+    matches = df[df[colName].astype(str).str.contains(str(query), case=False, na=False)]
+    
+    if matches.empty:
+        return f"No matches found for '{query}' in column '{colName}'"
+    
+    total_matches = len(matches)
+    matches = matches.head(limit)  # Only take the requested number of matches
+    
+    result = f"Found {total_matches} rows where {colName} contains '{query}':\n"
+    if total_matches > limit:
+        result += f"(Showing first {limit} matches)\n\n"
+    else:
+        result += "\n"
+    
+    for idx, row in matches.iterrows():
+        result += f"Match #{idx+1}:\n"
+        for col in df.columns:
+            value = row[col]
+            if pd.isna(value):
+                value = "N/A"
+            result += f"- {col}: {value}\n"
+        result += "\n"
+    
+    return result
