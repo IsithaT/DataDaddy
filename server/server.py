@@ -140,7 +140,8 @@ def handle_send_message(data):
                     "bargraphToImage": bargraphToImage,
                     "piechartToImage": piechartToImage,  # Add the new graph function
                     "get_filtered_results_from_string":get_filtered_results_from_string,
-                    "piechartList": piechartList
+                    "piechartList": piechartList,
+                    "correlationAnalysis": correlationAnalysis
                 }
 
                 # Process each tool call and collect outputs

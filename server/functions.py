@@ -3,13 +3,17 @@ AItools = [
         "type": "function",
         "function": {
             "name": "calculateMean",
-            "description": "Calculate the mean of a given column in a CSV file.",
+            "description": "Calculate the mean of a given column in a CSV file. Can optionally exclude outliers.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "colName": {
                         "type": "string",
                         "description": "The name of the column for which the mean should be calculated. It should contain only numeric values.",
+                    },
+                    "exclude_outliers": {
+                        "type": "boolean",
+                        "description": "Whether to exclude statistical outliers (values beyond 1.5 IQR). Defaults to false."
                     }
                 },
                 "required": ["colName"],
@@ -201,7 +205,7 @@ AItools = [
         "type": "function",
         "function": {
             "name": "histoToImage",
-            "description": "Generates a histogram visualization from a column of numeric data, showing the distribution of values. Uses Sturges' formula (k = 1 + log2(n)) to calculate optimal bin count if not specified. The graph is automatically emitted to all connected clients.",
+            "description": "Generates a histogram visualization from a column of numeric data. The graph is automatically emitted to all connected clients.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -231,7 +235,11 @@ AItools = [
                     },
                     "histobin": {
                         "type": "integer",
-                        "description": "Number of bins for the histogram (optional, if not specified uses Sturges' formula: k = 1 + log2(n))"
+                        "description": "Number of bins for the histogram (optional, if not specified uses Sturges' formula)"
+                    },
+                    "color": {
+                        "type": "string",
+                        "description": "Color for the histogram bars (optional, defaults to system color)"
                     }
                 },
                 "required": ["colName", "xaxis", "yaxis", "title"],
@@ -316,6 +324,38 @@ AItools = [
     },
     "strict": True
   }
-}
+},
 
+{
+    "type": "function",
+    "function": {
+        "name": "correlationAnalysis",
+        "description": "Analyze correlation between two numeric columns and generate a scatter plot with optional trend line.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "col1": {
+                    "type": "string",
+                    "description": "First column name (numeric values)"
+                },
+                "col2": {
+                    "type": "string",
+                    "description": "Second column name (numeric values)"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Title for the scatter plot"
+                },
+                "show_trend": {
+                    "type": "boolean",
+                    "description": "Whether to show trend line (optional, defaults to true)"
+                }
+            },
+            "required": ["col1", "col2", "title"],
+            "additionalProperties": False
+        },
+        "strict": True
+    }
+},
+    
 ]

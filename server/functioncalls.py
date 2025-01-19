@@ -19,10 +19,20 @@ def setcsv(inputcsv: str) -> str:
     return "CSV data stored"
 
 
-def calculateMean(colName: str) -> float | str:
+def calculateMean(colName: str, exclude_outliers: bool = False) -> float | str:
     data = getColumnFromCSV(csv, colName)
     try:
         numeric_data = [float(x) for x in data]
+        if exclude_outliers:
+            # Calculate IQR and bounds
+            q1 = np.percentile(numeric_data, 25)
+            q3 = np.percentile(numeric_data, 75)
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            # Filter outliers
+            filtered_data = [x for x in numeric_data if lower_bound <= x <= upper_bound]
+            return sum(filtered_data) / len(filtered_data)
         return sum(numeric_data) / len(numeric_data)
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
@@ -605,3 +615,40 @@ def searchRowDetails(colName: str, query: str, limit: int = 5) -> str:
         result += "\n"
 
     return result
+
+
+def correlationAnalysis(col1: str, col2: str, title: str, show_trend: bool = True) -> str:
+    try:
+        data1 = getColumnFromCSV(csv, col1)
+        data2 = getColumnFromCSV(csv, col2)
+        
+        if len(data1) != len(data2):
+            return "Error: Columns have different lengths"
+            
+        # Calculate correlation coefficient
+        correlation = np.corrcoef(data1, data2)[0,1]
+        
+        # Create scatter plot
+        plt.figure(figsize=(10, 6))
+        plt.scatter(data1, data2, alpha=0.5)
+        
+        if show_trend:
+            z = np.polyfit(data1, data2, 1)
+            p = np.poly1d(z)
+            plt.plot(data1, p(data1), "r--", alpha=0.8)
+            
+        plt.xlabel(col1)
+        plt.ylabel(col2)
+        plt.title(f"{title}\nCorrelation: {correlation:.3f}")
+        
+        # Save and emit plot
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+        encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+        emit("image_received", {"image_data": encoded_image, "format": "png"}, broadcast=True)
+        
+        plt.close()
+        return f"Correlation coefficient between {col1} and {col2}: {correlation:.3f}"
+    except Exception as e:
+        return f"Error performing correlation analysis: {str(e)}"

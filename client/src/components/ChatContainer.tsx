@@ -23,7 +23,7 @@ export default function ChatContainer() {
                     {images.length > 0 && (
                         <button
                             onClick={() => setIsImageCarouselOpen(true)}
-                            className="w-full bg-excel-100 hover:bg-excel-200 px-4 py-2 rounded-lg shadow-md"
+                            className="w-full bg-excel-100 hover:bg-excel-200 px-4 py-2 rounded-lg shadow-md text-excel-600"
                         >
                             View Visualizations ({images.length})
                         </button>

@@ -57,7 +57,7 @@ export default function ChatMessages({
 
     return (
         <div className="h-full flex flex-col">
-            <div className="bg-white rounded-lg shadow-sm border border-excel-300 overflow-y-auto p-12 mb-4 scroll-smooth max-h-[calc(90vh-15rem)]">
+            <div className="bg-white rounded-lg shadow-sm border border-excel-300 overflow-y-auto p-12 mb-4 scroll-smooth max-h-[calc(90vh-12rem)]">
                 <div className="max-w-3xl mx-auto">
                     {messages.map((message, index) => (
                         <div
