@@ -20,7 +20,7 @@ def create_assistant(client):
     """Create an assistant with the specified parameters."""
     return client.beta.assistants.create(
         name="Data Helper",
-        instructions="You are a smart data bot, help the user analyse data, use the tools available to you when it helps.",
+        instructions="You are a smart data analysis assistant. Help users understand and analyze their data using the tools available to you. Always reference the data structure and content in your responses.",
         tools=AItools,
         model="gpt-4o-mini",
     )

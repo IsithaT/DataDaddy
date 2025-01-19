@@ -13,6 +13,9 @@ from llm import (
 import json
 import time
 
+# Base instructions for the assistant
+BASE_INSTRUCTIONS = """You are a smart data analysis assistant. Help users understand and analyze their data using the tools available to you. Always reference the data structure and content in your responses."""
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -66,7 +69,12 @@ def handle_create_thread():
     Emits thread creation confirmation with the new thread ID.
     """
     thread = create_thread(client)
-    active_threads[thread.id] = {"messages": []}
+    active_threads[thread.id] = {
+        "messages": [],
+        "csv_data": None,
+        "headers": None,
+        "data_row": None
+    }
     join_room(thread.id)
     emit("thread_created", {"thread_id": thread.id, "status": "created"})
 
@@ -89,11 +97,20 @@ def handle_send_message(data):
             room=thread_id,
         )
 
-        # Run assistant
+        # Build context including CSV data if available
+        context = BASE_INSTRUCTIONS
+        if thread_id in active_threads and active_threads[thread_id]["data_row"]:
+            headers = active_threads[thread_id]["headers"]
+            data_row = active_threads[thread_id]["data_row"]
+            context += f"\nThe CSV file contains these columns: {', '.join(headers)}."
+            context += f"\nAn example row contains: {dict(zip(headers, data_row))}"
+            context += "\nReference this data structure in your analysis and responses."
+
+        # Run assistant with context
         run = client.beta.threads.runs.create(
             thread_id=thread_id,
             assistant_id=assistant.id,
-            instructions="Provide a clear and helpful response",
+            instructions=context
         )
 
         # Poll for run completion and handle function calls
@@ -180,6 +197,13 @@ def handle_send_csv(data):
         dataRow = getFirstDataRowFromCSV(csv_content)
         print(f"Processing CSV with headers: {headers}")
 
+        # Store CSV info in thread data
+        active_threads[thread_id].update({
+            "csv_data": csv_content,
+            "headers": headers,
+            "data_row": dataRow
+        })
+
         # Store CSV content globally for function calls
         setcsv(csv_content)
 
@@ -190,21 +214,25 @@ def handle_send_csv(data):
             room=thread_id,
         )
 
-        # Initialize conversation with CSV context
+        # Build initial context with CSV information
+        context = f"{BASE_INSTRUCTIONS}\n"
+        context += f"The CSV file contains these columns: {', '.join(headers)}.\n"
+        context += f"An example row contains: {dict(zip(headers, dataRow))}\n"
+        context += "Please acknowledge this data structure and explain what kind of analysis you can perform based on the column types and content."
+
         message = send_message(
             client,
             thread_id,
-            f"I've loaded a CSV file. It is ready to be analyzed.",
+            "I've loaded a CSV file. It is ready to be analyzed."
         )
-        print(dataRow)
-
-        # Run initial analysis
+        
         run = run_assistant(
             client,
             thread_id,
             assistant.id,
-            f"Please acknowledge the CSV data and ask how you can help analyze it. An example row of data is {dataRow}",
+            context
         )
+        
         # Get and send response
         messages = list_messages(client, thread_id)
         emit(
