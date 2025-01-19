@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
 import { config } from '../config';
 
@@ -44,19 +45,26 @@ export default function ChatMessages({ messages, onSendMessage, onClear, isTypin
 
     return (
         <div className="h-full flex flex-col">
-            <div className="flex-1 bg-white rounded-lg shadow-sm border border-excel-300 overflow-y-auto py-4 px-12 mb-4 scroll-smooth">
+            <div className="bg-white rounded-lg shadow-sm border border-excel-300 overflow-y-auto p-12 mb-4 scroll-smooth max-h-[calc(90vh-15rem)]">
                 <div className="max-w-3xl mx-auto">
                     {messages.map((message, index) => (
                         <div
                             key={index}
-                            className={`mb-6`}
+                            className={`mb-6 ${message.role === 'user' ? 'ml-auto' : 'mr-auto'} max-w-[80%] w-full ${
+                                message.role === 'assistant' ? 'bg-excel-50/50 p-4 rounded-lg border border-excel-100' : ''
+                            }`}
                         >
-                            <div className={`text-xl text-excel-600 mb-1 ${message.role === 'assistant' ? 'font-bold' : ''
-                                }`}>
+                            <div className={`text-xl text-excel-600 mb-1 ${
+                                message.role === 'user' ? 'text-right' : 'text-left'
+                            }`}>
                                 {message.role === 'assistant' ? config.assistant.name : 'You'}:
                             </div>
-                            <div className="text-gray-800 whitespace-pre-wrap mb-2">
-                                {message.content}
+                            <div className={`text-gray-800 prose max-w-none ${
+                                message.role === 'user' ? 'text-right' : 'text-left'
+                            }`}>
+                                <ReactMarkdown>
+                                    {message.content}
+                                </ReactMarkdown>
                             </div>
                             {message.attachments?.map((attachment, i) => (
                                 <div key={i} className="mt-2">
@@ -73,13 +81,13 @@ export default function ChatMessages({ messages, onSendMessage, onClear, isTypin
                                 </div>
 
                             ))}
-                            <br />
-                            <hr />
                         </div>
                     ))}
                     {isTyping && (
-                        <div className="pl-4 text-excel-600">
-                            {config.assistant.name} {config.assistant.typingText}
+                        <div className="mr-auto max-w-[80%] w-full bg-excel-50/50 p-4 rounded-lg border border-excel-100">
+                            <div className="text-xl text-excel-600 mb-1">
+                                {config.assistant.name} {config.assistant.typingText}
+                            </div>
                         </div>
                     )}
                     <div ref={messagesEndRef} />

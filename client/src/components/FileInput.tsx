@@ -86,7 +86,7 @@ export default function FileInput({ onAnalysis }: FileInputProps) {
             {csvContent && (
                 <div className="w-full mt-4 ">
                     <h2 className="text-xl mb-2 text-excel-600">CSV Content:</h2>
-                    <pre className="bg-white p-4 max-h-96 overflow-auto rounded-lg border border-excel-300 overflow-x-auto text-xs">
+                    <pre className="bg-white p-4 max-h-64 text-left overflow-auto rounded-lg border border-excel-300 overflow-x-auto text-[0.5rem]">
                         {csvContent}
                     </pre>
                 </div>

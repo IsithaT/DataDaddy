@@ -1,7 +1,7 @@
 
 export const config = {
     assistant: {
-        name: 'Data Analyzer',  
-        typingText: 'is data crunching like a dad...',
+        name: 'Diddy Kong',
+        typingText: 'is analyzing your data...',
     }
 } as const;
