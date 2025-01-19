@@ -105,7 +105,8 @@ export default function ChatMessages({
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Ask a question about your data..."
-                    className="flex-1 p-3 border border-excel-300 rounded-lg focus:outline-none focus:border-excel-600 text-lg"
+                    className="flex-1 p-3 border border-excel-500 rounded-lg focus:outline-none 
+                    hover:bg-excel-400 focus:border-excel-600 text-lg"
                 />
                 <button type="submit" className="px-6 py-3 text-lg">
                     Send
