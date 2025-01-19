@@ -133,7 +133,6 @@ def handle_clear_thread(data):
         emit('error', {'msg': 'Invalid thread_id'})
 
 
-
 @socketio.on('send_csv')
 def handle_send_csv(data):
     """
@@ -151,6 +150,8 @@ def handle_send_csv(data):
     #     return
 
     print("ASSDD", csv_content)
+    names = getFirstRowFromCSV(csv_content)
+    print("NAMES", names)
     # Emit confirmation to the client
     # emit('csv_received', {
     #     # 'thread_id': thread_id,
@@ -158,8 +159,5 @@ def handle_send_csv(data):
     # }, room=thread_id)
 
 
-
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5001)
-
-

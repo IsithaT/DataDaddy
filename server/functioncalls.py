@@ -27,7 +27,7 @@ def calculateVariance(data: list) -> float:
 def calculateStandardDeviation(data: list) -> float:
     return calculateVariance(data)**0.5
 
-#likely delete lol
+# likely delete lol
 def graphDisplay (data: list) -> str:
     data.sort()
     plt.hist(data, bins = 10, color = 'blue', edgecolor = 'black')
@@ -157,11 +157,13 @@ def getFirstColumnFromCSV(csv_string: str) -> list:
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')))
     return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df[df.columns[0]].tolist()]
 
+
 def getFirstRowFromCSV(csv_string: str) -> list:
-    cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
-    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')), index_col=0)
-    return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df.iloc[0].tolist()]
-    
+    cleaned_csv_string = csv_string.rstrip(",")  # Remove trailing comma
+    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
+    return df.columns.tolist()
+
+
 def getColumnFromCSV(csv_string: str, col_name: str) -> list:
     cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')))
@@ -186,5 +188,3 @@ def getRowFromCSV(csv_string: str, row_name: str) -> list:
 
 def organizeDataCount(data: list) -> dict:
     return dict(Counter(data))
-
-
