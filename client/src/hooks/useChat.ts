@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 const socket = io('http://localhost:5001');
 
 export function useChat() {
-    const [context, setContext] = useState<ChatContext>({ messages: []});
+    const [context, setContext] = useState<ChatContext>({ messages: [] });
     const [threadId, setThreadId] = useState<string | null>(null);
     const [isTyping, setIsTyping] = useState(false);
     const [images, setImages] = useState<Attachment[]>([]);
@@ -17,7 +17,7 @@ export function useChat() {
             socket.emit('join_thread', { thread_id: data.thread_id });
             if (context.csvContent) {
                 setIsTyping(true); // Set typing when sending CSV
-                socket.emit('send_csv', { thread_id: data.thread_id, csvContent: context.csvContent});
+                socket.emit('send_csv', { thread_id: data.thread_id, csvContent: context.csvContent });
             }
         });
 
@@ -28,17 +28,20 @@ export function useChat() {
 
         socket.on('message_received', (data) => {
             console.log('Received messages:', data);
+            if (data.messages.length !== 2) {
+                data.messages.reverse();
+            }
             setContext(prev => {
                 // Get all existing messages that aren't in the new message set
-                const existingMessages = prev.messages.filter(msg => 
-                    !data.messages.some(newMsg => 
+                const existingMessages = prev.messages.filter(msg =>
+                    !data.messages.some(newMsg =>
                         newMsg.content === msg.content && newMsg.role === msg.role
                     )
                 );
-                
+
                 // Add new messages in reverse order (newest first)
                 const newMessages = data.messages.reverse();
-                
+
                 return {
                     ...prev,
                     messages: [...existingMessages, ...newMessages]
@@ -58,17 +61,7 @@ export function useChat() {
                 type: 'image'
             };
             setImages(prev => [...prev, newImage]);
-            
-            // Add a text message about the visualization
-            const imageMessage: Message = {
-                role: 'assistant',
-                content: 'I\'ve generated a new visualization. Click the "View Visualizations" button to see it.',
-                timestamp: new Date()
-            };
-            setContext(prev => ({
-                ...prev,
-                messages: [...prev.messages, imageMessage]
-            }));
+
         });
 
         socket.on('thread_cleared', (data) => {
@@ -94,7 +87,7 @@ export function useChat() {
         setContext(prev => ({
             ...prev,
             csvContent: content
-        }));    
+        }));
         socket.emit('create_thread');
 
     };
