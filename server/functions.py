@@ -262,5 +262,60 @@ AItools = [
             },
             "strict": True
         }
-    }
+    },
+    {
+  "type": "function",
+  "function": {
+    "name": "get_filtered_results_from_string",
+    "description": "Fetches a list of values from a target column in a CSV string based on a specific filter applied to another column.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query_param": {
+          "type": "string",
+          "description": "The column name to apply the filter on."
+        },
+        "query_value": {
+          "type": "string",
+          "description": "The value to filter the rows by in the query column."
+        },
+        "target_param": {
+          "type": "string",
+          "description": "The column name to retrieve values from based on the filter."
+        }
+      },
+      "required": ["query_param", "query_value", "target_param"],
+      "additionalProperties": False
+    },
+    "strict": True
+  }
+},
+
+{
+  "type": "function",
+  "function": {
+    "name": "piechartList",
+    "description": "Generates a pie chart image from the provided data list and emits the image via WebSocket to all connected clients. Can be used in conjunction with get_filtered_results_from_string",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "valSet": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "A list of all the values used to calculate proportions for the pie chart."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the pie chart."
+        }
+      },
+      "required": ["valSet", "title"],
+      "additionalProperties": False
+    },
+    "strict": True
+  }
+}
+
 ]

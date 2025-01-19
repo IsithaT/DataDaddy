@@ -237,6 +237,91 @@ def piechartToImage(colName: str, title: str) -> str:
         plt.close("all")  # Ensure all figures are closed
 
 
+
+def piechartList(valSet: list, title: str) -> str:
+    """
+    Generates a pie chart image from the provided column data and emits the image via WebSocket to all clients.
+
+    Args:
+        valSet: a list of all the values
+        title: Title of the chart.
+
+    Returns:
+        str: A message indicating success or failure of the operation.
+    """
+    try:
+        # Retrieve and organize the data based on the column name
+        data = organizeDataCount(valSet)
+
+        # Extract labels and values from the data
+        labels = data.keys()
+        sizes = data.values()
+
+        # Create a new figure for the pie chart
+        plt.figure()
+        plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+        plt.axis("equal")
+        plt.title(title)
+
+        # Save to buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+
+        # Convert to base64
+        encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+        # Cleanup
+        plt.close("all")
+        buf.close()
+
+        # Emit the image
+        emit(
+            "image_received",
+            {"image_data": encoded_image, "format": "png"},
+            broadcast=True,
+        )
+
+        return f"Successfully generated and emitted pie chart for column '{colName}'"
+    except Exception as e:
+        error_msg = f"Error generating pie chart: {str(e)}"
+        print(error_msg)
+        emit("error", {"msg": error_msg})
+        return error_msg
+    finally:
+        plt.close("all")  # Ensure all figures are closed
+
+
+def get_filtered_results_from_string(query_param, query_value, target_param):
+    """
+    Fetches a list of values from the target column based on a specific filter in another column.
+
+    :param query_param: The column name to apply the filter on.
+    :param query_value: The value to filter by.
+    :param target_param: The column name to retrieve values from.
+    :return: List of results from the target column.
+    """
+    # Split the CSV string into rows
+    rows = csv.strip().split('\n')
+    # Extract headers from the first row
+    headers = rows[0].split(',')
+
+    # Get the indices of the query and target columns
+    query_index = headers.index(query_param)
+    target_index = headers.index(target_param)
+
+    # Iterate through the data rows and collect results
+    results = []
+    for row in rows[1:]:
+        columns = row.split(',')
+        if columns[query_index] == query_value:
+            results.append(columns[target_index])
+    print("RESULTS: ", results)
+
+    return results
+
+
+
 def scatterplotToImage(
     xdata: list,
     ydata: list,
