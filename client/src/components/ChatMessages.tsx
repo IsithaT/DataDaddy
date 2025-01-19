@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Message } from '../types';
+import { Message, MessageAttachment } from '../types';
 import { config } from '../config';
 import ImageCarousel from './ImageCarousel';
 
@@ -9,7 +9,7 @@ interface ChatMessagesProps {
     onSendMessage: (content: string) => void;
     onClear: () => void;
     isTyping: boolean;
-    images: Attachment[];
+    images: MessageAttachment[];
     isImageCarouselOpen: boolean;
     setIsImageCarouselOpen: (isOpen: boolean) => void;
 }

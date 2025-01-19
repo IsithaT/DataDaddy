@@ -17,3 +17,19 @@ export interface ChatContext {
     messages: Message[];
     csvContent?: string;
 }
+
+export interface ThreadCreatedPayload {
+    thread_id: string;
+}
+
+export interface MessageReceivedPayload {
+    messages: Message[];
+}
+
+export interface ImageReceivedPayload {
+    image_data: string;
+}
+
+export interface ThreadClearedPayload {
+    thread_id: string;
+}

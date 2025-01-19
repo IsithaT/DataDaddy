@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Message, ChatContext, MessageAttachment } from '../types';
-import { io } from 'socket.io-client';
+import { 
+    Message, 
+    ChatContext, 
+    MessageAttachment, 
+    ThreadCreatedPayload,
+    MessageReceivedPayload,
+    ImageReceivedPayload,
+} from '../types';
+import io from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
 
@@ -12,7 +19,7 @@ export function useChat() {
     const [isImageCarouselOpen, setIsImageCarouselOpen] = useState(false);
 
     useEffect(() => {
-        socket.on('thread_created', (data) => {
+        socket.on('thread_created', (data: ThreadCreatedPayload) => {
             setThreadId(data.thread_id);
             socket.emit('join_thread', { thread_id: data.thread_id });
             if (context.csvContent) {
@@ -26,7 +33,7 @@ export function useChat() {
             setIsTyping(true);
         });
 
-        socket.on('message_received', (data) => {
+        socket.on('message_received', (data: MessageReceivedPayload) => {
             console.log('Received messages:', data);
             if (data.messages.length !== 2) {
                 data.messages.reverse();
@@ -54,7 +61,7 @@ export function useChat() {
             setIsTyping(true);
         });
 
-        socket.on('image_received', (data) => {
+        socket.on('image_received', (data: ImageReceivedPayload) => {
             const newImage: MessageAttachment = {
                 url: `data:image/png;base64,${data.image_data}`,
                 type: 'image'
@@ -63,7 +70,7 @@ export function useChat() {
 
         });
 
-        socket.on('thread_cleared', (data) => {
+        socket.on('thread_cleared', () => {
             setContext(prev => ({
                 ...prev,
                 messages: []
