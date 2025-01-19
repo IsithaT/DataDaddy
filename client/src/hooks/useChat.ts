@@ -5,17 +5,19 @@ import { io } from 'socket.io-client';
 const socket = io('http://localhost:5001');
 
 export function useChat() {
-    const [context, setContext] = useState<ChatContext>({ messages: [] });
+    const [context, setContext] = useState<ChatContext>({ messages: []});
     const [threadId, setThreadId] = useState<string | null>(null);
 
     useEffect(() => {
         socket.on('thread_created', (data) => {
             setThreadId(data.thread_id);
             socket.emit('join_thread', { thread_id: data.thread_id });
-            socket.emit('send_csv', context.csvContent)
+            console.log(context.csvContent?.toString());
+            socket.emit('send_csv', context.csvContent?.toString());
         });
 
         socket.on('message_received', (data) => {
+            console.log(data);
             setContext(prev => ({
                 ...prev,
                 messages: data.messages
@@ -34,15 +36,16 @@ export function useChat() {
             socket.off('message_received');
             socket.off('thread_cleared');
         };
-    }, []);
+    }, [context.csvContent]);
 
     const handleFileAnalysis = (content: string) => {
         // Request new thread when file is uploaded
-        socket.emit('create_thread');
         setContext(prev => ({
             ...prev,
             csvContent: content
-        }));
+        }));    
+        socket.emit('create_thread');
+
     };
 
     const handleSendMessage = async (content: string) => {
