@@ -56,7 +56,7 @@ def handle_join_thread(data):
     Emits a status message confirming the room join operation.
     """
     thread_id = data.get("thread_id")
-    if thread_id:
+    if (thread_id):
         join_room(thread_id)
         emit("status", {"msg": f"Joined thread {thread_id}"})
 
@@ -122,24 +122,48 @@ def handle_send_message(data):
             if run_status.status == "requires_action":
                 tool_calls = run_status.required_action.submit_tool_outputs.tool_calls
                 tool_outputs = []
+                
+                # Create a map of all available functions
+                function_map = {
+                    "calculateMean": calculateMean,
+                    "calculateMedian": calculateMedian,
+                    "calculateMode": calculateMode,
+                    "calculateVariance": calculateVariance,
+                    "calculateStandardDeviation": calculateStandardDeviation,
+                    "countRowsInCSV": lambda: countRowsInCSV(csv),  # Note: Using lambda since it doesn't need parameters
+                    "getColumnInfo": getColumnInfo,
+                    "searchValue": searchValue,
+                    "searchRowDetails": searchRowDetails,  # Add the new search function
+                }
 
+                # Process each tool call and collect outputs
                 for tool_call in tool_calls:
                     function_name = tool_call.function.name
                     function_args = json.loads(tool_call.function.arguments)
+                    
+                    try:
+                        if function_name in function_map:
+                            result = function_map[function_name](**function_args)
+                        else:
+                            result = f"Function {function_name} not implemented"
+                        
+                        tool_outputs.append({
+                            "tool_call_id": tool_call.id,
+                            "output": str(result)
+                        })
+                    except Exception as func_error:
+                        tool_outputs.append({
+                            "tool_call_id": tool_call.id,
+                            "output": f"Error executing {function_name}: {str(func_error)}"
+                        })
 
-                    print(
-                        f"Calling function: {function_name} with args: {function_args}"
+                # Submit all tool outputs together
+                if tool_outputs:
+                    client.beta.threads.runs.submit_tool_outputs(
+                        thread_id=thread_id,
+                        run_id=run.id,
+                        tool_outputs=tool_outputs
                     )
-
-                    if function_name == "calculateMean":
-                        result = calculateMean(**function_args)
-                        tool_outputs.append(
-                            {"tool_call_id": tool_call.id, "output": str(result)}
-                        )
-
-                client.beta.threads.runs.submit_tool_outputs(
-                    thread_id=thread_id, run_id=run.id, tool_outputs=tool_outputs
-                )
                 continue
 
             if run_status.status == "completed":

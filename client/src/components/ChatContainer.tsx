@@ -4,7 +4,7 @@ import { useChat } from '../hooks/useChat';
 import { config } from '../config';
 
 export default function ChatContainer() {
-    const { context, handleFileAnalysis, handleSendMessage, clearContext } = useChat();
+    const { context, handleFileAnalysis, handleSendMessage, clearContext, isTyping } = useChat();
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
@@ -19,6 +19,7 @@ export default function ChatContainer() {
                         messages={context.messages} 
                         onSendMessage={handleSendMessage}
                         onClear={clearContext}
+                        isTyping={isTyping}
                     />
                 ) : (
                     <div className="h-full flex items-center justify-center text-excel-600 text-lg border-2 border-dashed border-excel-300 rounded-lg bg-white/50">
