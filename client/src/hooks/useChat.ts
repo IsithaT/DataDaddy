@@ -1,8 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Message, ChatContext } from '../types';
+import io from 'socket.io-client';
+
+const SOCKET_SERVER_URL = "http://localhost:5001"; // Ensure this matches your server URL and port
 
 export function useChat() {
     const [context, setContext] = useState<ChatContext>({ messages: [] });
+    const socket = io(SOCKET_SERVER_URL);
+
+    useEffect(() => {
+        // Handle connection
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket server');
+        });
+
+        // Handle disconnection
+        socket.on('disconnect', () => {
+            console.log('Disconnected from WebSocket server');
+        });
+
+        // Handle incoming messages
+        socket.on('message_received', (data) => {
+            setContext(prev => ({
+                ...prev,
+                messages: [...prev.messages, ...data.messages]
+            }));
+        });
+
+        // Handle thread creation
+        socket.on('thread_created', (data) => {
+            console.log(`Thread created with ID: ${data.thread_id}`);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            socket.disconnect();
+        };
+    }, [socket]);
 
     const getPlaceholderResponse = (userMessage: string): Message => {
         const message = userMessage.toLowerCase();
@@ -50,14 +84,11 @@ export function useChat() {
             messages: [...prev.messages, userMessage]
         }));
 
-        // Simulate API delay
-        setTimeout(() => {
-            const assistantMessage = getPlaceholderResponse(content);
-            setContext(prev => ({
-                ...prev,
-                messages: [...prev.messages, assistantMessage]
-            }));
-        }, 1000);
+        // Send message to the server
+        socket.emit('send_message', {
+            thread_id: 'your_thread_id', // Replace with actual thread ID
+            message: content
+        });
     };
 
     const clearContext = () => {
