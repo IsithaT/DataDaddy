@@ -177,6 +177,7 @@ def handle_send_csv(data):
     try:
         # Parse CSV headers
         headers = getFirstRowFromCSV(csv_content)
+        dataRow = getFirstDataRowFromCSV(csv_content)
         print(f"Processing CSV with headers: {headers}")
 
         # Store CSV content globally for function calls
@@ -193,17 +194,17 @@ def handle_send_csv(data):
         message = send_message(
             client,
             thread_id,
-            f"I've loaded a CSV file with the following columns: {headers}. What would you like to know about this data?",
+            f"I've loaded a CSV file. It is ready to be analyzed.",
         )
+        print(dataRow)
 
         # Run initial analysis
         run = run_assistant(
             client,
             thread_id,
             assistant.id,
-            "Please acknowledge the CSV data and ask how you can help analyze it.",
+            f"Please acknowledge the CSV data and ask how you can help analyze it. An example row of data is {dataRow}",
         )
-
         # Get and send response
         messages = list_messages(client, thread_id)
         emit(

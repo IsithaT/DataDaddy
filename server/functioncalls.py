@@ -179,6 +179,21 @@ def getFirstRowFromCSV(csv_string: str) -> list:
         raise e
 
 
+def getFirstDataRowFromCSV(csv_string: str) -> list:
+    try:
+        rows = csv_string.strip().split("\n")
+        if len(rows) > 1:  # Ensure there is at least one data row
+            first_data_row = [value.strip('\r') for value in rows[1].split(",")]
+            print(f"Extracted first data row: {first_data_row}")
+            return first_data_row
+        else:
+            print("No data rows found in the CSV.")
+            return []
+    except Exception as e:
+        print(f"Error parsing CSV data rows: {str(e)}")
+        raise e
+
+
 def getColumnFromCSV(csv_string: str, col_name: str) -> list:
     cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')))
