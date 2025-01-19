@@ -85,6 +85,10 @@ def calculateMedianfromList(data: list) -> float | str:
 
 def calculateMode(colName: str) -> str:
     data = getColumnFromCSV(csv, colName)
+    # First check if all values can be converted to float
+    if not all(isinstance(x, (int, float)) or (isinstance(x, str) and x.replace('.', '').isdigit()) for x in data):
+        return f"Error: Column '{colName}' contains non-numeric values"
+    
     try:
         numeric_data = [float(x) for x in data]
         # Get frequency of each value

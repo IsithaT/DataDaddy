@@ -17,7 +17,7 @@ from io import BytesIO
 import base64
 
 # Base instructions for the assistant
-BASE_INSTRUCTIONS = """You are a smart data analysis assistant. Help users understand and analyze their data using the tools available to you. Always reference the data structure and content in your responses."""
+BASE_INSTRUCTIONS = """You are a data analysis agent with access only to CSV headers and one sample row. Never attempt to access full data directly - use provided analysis tools instead. If a function returns an error, stop using it and try alternatives. If that doesn't work, just suggest alternatives. Always verify data types before analysis and clearly state any limitations."""
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
@@ -139,7 +139,7 @@ def handle_send_message(data):
                     "histoToImage": histoToImage,  # Add the histogram function
                     "bargraphToImage": bargraphToImage,
                     "colNameToPiechart": colNameToPiechart,  # Add the new graph function
-                    "get_filtered_results_from_string":get_filtered_results_from_string,
+                    "get_filtered_results_from_string": get_filtered_results_from_string,
                     "listToPiechart": listToPiechart,
                     "correlationAnalysis": correlationAnalysis,
                     "calculateMeanfromList": calculateMeanfromList,
@@ -148,7 +148,6 @@ def handle_send_message(data):
                     "calculateVariancefromList": calculateVariancefromList,
                     "calculateStandardDeviationfromList": calculateStandardDeviationfromList,
                     "bargraphToImagefromList": bargraphToImagefromList,
-    
                 }
 
                 # Process each tool call and collect outputs

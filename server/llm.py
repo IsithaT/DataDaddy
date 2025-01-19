@@ -20,9 +20,9 @@ def create_assistant(client):
     """Create an assistant with the specified parameters."""
     return client.beta.assistants.create(
         name="Data Helper",
-        instructions="You are a smart data analysis assistant. Help users understand and analyze their data using the tools available to you. Always reference the data structure and content in your responses.",
+        instructions="""You are a data analysis agent with access only to CSV headers and one sample row. Never attempt to access full data directly - use provided analysis tools instead. If a function returns an error, stop using it and try alternatives. If that doesn't work, just suggest alternatives. Always verify data types before analysis and clearly state any limitations.""",
         tools=AItools,
-        model="gpt-4o-mini",
+        model="gpt-4o",
     )
 
 def create_thread(client):
