@@ -62,20 +62,19 @@ export default function ChatMessages({ messages, onSendMessage, onClear }: ChatM
                                 {message.content}
                             </div>
                             {message.attachments?.map((attachment, i) => (
-                                <div key={i} className="mt-2">
-                                    <img
-                                        src={attachment.url}
-                                        alt={attachment.caption || 'Analysis visualization'}
-                                        className="rounded-lg border border-excel-300 w-full"
-                                    />
-                                    {attachment.caption && (
-                                        <p className="text-sm text-excel-600 mt-1 italic">
-                                            {attachment.caption}
-                                        </p>
-                                    )}
-                                </div>
-
-                            ))}
+    <div key={i} className="mt-2">
+        <img
+            src={attachment.url}
+            alt={attachment.caption || 'Analysis visualization'}
+            className="rounded-lg border border-excel-300 w-full"
+        />
+        {attachment.caption && (
+            <p className="text-sm text-excel-600 mt-1 italic">
+                {attachment.caption}
+            </p>
+        )}
+    </div>
+))}
                             <br />
                             <hr />
                         </div>

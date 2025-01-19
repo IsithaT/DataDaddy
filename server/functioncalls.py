@@ -173,7 +173,23 @@ def scatterplotToImage(
     return buf.getvalue()
 
 
-def bargraphToImage(data: dict, xaxis: str, yaxis: str, title: str) -> bytes:
+import base64
+import io
+import matplotlib.pyplot as plt
+from flask_socketio import emit
+
+def bargraphToImage(data: dict, xaxis: str, yaxis: str, title: str) -> None:
+    """
+    Generates a bar graph image from the provided data and emits the image via WebSocket to all clients.
+
+    Args:
+        data: Dictionary containing the data to be plotted (x: labels, y: values).
+        xaxis: Label for the x-axis.
+        yaxis: Label for the y-axis.
+        title: Title of the graph.
+
+    Emits the generated bar graph image as Base64-encoded PNG data to all connected clients.
+    """
     plt.clf()  # Clear any existing plots
     labels = data.keys()
     values = data.values()
@@ -187,7 +203,16 @@ def bargraphToImage(data: dict, xaxis: str, yaxis: str, title: str) -> bytes:
     fig.savefig(buf, format="png")
     buf.seek(0)
     plt.close()  # Clean up the plot
-    return buf.getvalue()
+
+    # Convert image to Base64-encoded string
+    encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+    # Emit the image data to all connected clients via WebSocket
+    emit(
+        "image_received",
+        {"image_data": encoded_image, "format": "png"},
+        broadcast=True  # This ensures all clients connected to the WebSocket will receive the image
+    )
 
 
 def plotgraphToImage(

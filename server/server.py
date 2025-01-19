@@ -251,5 +251,40 @@ def handle_send_csv(data):
         emit("error", {"msg": f"Error processing CSV: {str(e)}"})
 
 
+
+@socketio.on("upload_image")
+def handle_upload_image(data):
+    """
+    Processes binary image data sent by the client and sends it back as Base64.
+    Args:
+        data: Dictionary containing image_data (binary Base64-encoded string).
+    Emits the Base64-encoded image string to all connected clients.
+    """
+    image_data = data.get("image_data")
+
+    if not image_data:
+        emit("error", {"msg": "Missing image_data"})
+        return
+
+    try:
+        # Decode the binary image data
+        image_binary = base64.b64decode(image_data)
+        image = Image.open(BytesIO(image_binary))
+
+        # Re-encode the image to Base64 (e.g., after resizing or processing)
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        encoded_image = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+        # Emit the image data to all connected clients
+        emit(
+            "image_received",
+            {"image_data": encoded_image, "format": "png"},
+            broadcast=True  # This will send to all connected clients
+        )
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        emit("error", {"msg": f"Error processing image: {str(e)}"})
+
 if __name__ == "__main__":
     socketio.run(app, debug=True, port=5001)

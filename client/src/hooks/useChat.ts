@@ -26,6 +26,23 @@ export function useChat() {
             }));
         });
 
+        socket.on('image_received', (data) => {
+            const imageMessage: Message = {
+                role: 'assistant',
+                content: 'Sent an image',
+                timestamp: new Date(),
+                attachments: [{
+                    url: `data:image/png;base64,${data.image_data}`,
+                    caption: 'Generated image',
+                    type: 'image'
+                }]
+            };
+            setContext(prev => ({
+                ...prev,
+                messages: [...prev.messages, imageMessage]
+            }));
+        });
+
         socket.on('thread_cleared', (data) => {
             setContext(prev => ({
                 ...prev,
@@ -36,6 +53,7 @@ export function useChat() {
         return () => {
             socket.off('thread_created');
             socket.off('message_received');
+            socket.off('image_received');
             socket.off('thread_cleared');
         };
     }, [context.csvContent]);
