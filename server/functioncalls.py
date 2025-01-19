@@ -133,7 +133,7 @@ def histoToImage(
         plt.hist(
             data,
             bins=histobin,
-            color=(33/255, 127/255, 85/255),
+            color=(33 / 255, 127 / 255, 85 / 255),
             edgecolor="#7ed3aa",
             density=density,
         )
@@ -143,14 +143,16 @@ def histoToImage(
             std_dev = calculateStandardDeviation(colName)
             xmin, xmax = plt.xlim()
             x = np.linspace(xmin, xmax, 100)
-            p = np.exp(-0.5 * ((x - mean) / std_dev) ** 2) / (std_dev * np.sqrt(2 * np.pi))
+            p = np.exp(-0.5 * ((x - mean) / std_dev) ** 2) / (
+                std_dev * np.sqrt(2 * np.pi)
+            )
             plt.plot(x, p, color="#d62728", linewidth=2)
 
-    plt.xlabel(xaxis)
-    plt.ylabel(yaxis)
-    plt.title(title)
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(format_yaxis))
-    fig = plt.gcf()
+        plt.xlabel(xaxis)
+        plt.ylabel(yaxis)
+        plt.title(title)
+        plt.gca().yaxis.set_major_formatter(FuncFormatter(format_yaxis))
+        fig = plt.gcf()
 
         # Save to buffer
         buf = io.BytesIO()
@@ -165,7 +167,11 @@ def histoToImage(
         buf.close()
 
         # Emit the image
-        emit("image_received", {"image_data": encoded_image, "format": "png"}, broadcast=True)
+        emit(
+            "image_received",
+            {"image_data": encoded_image, "format": "png"},
+            broadcast=True,
+        )
 
         return f"Successfully generated and emitted histogram for column '{colName}'"
     except Exception as e:
@@ -177,12 +183,25 @@ def histoToImage(
         plt.close("all")
 
 
-def piechartToImage(data: dict, title: str) -> bytes:
+def piechartToImage(colName: str, title: str) -> str:
+    """
+    Generates a pie chart image from the provided column data and emits the image via WebSocket to all clients.
+
+    Args:
+        colName: Column name to retrieve data from the CSV file.
+        title: Title of the chart.
+
+    Returns:
+        str: A message indicating success or failure of the operation.
+    """
     try:
-        plt.figure()
+        # Retrieve and organize the data based on the column name
+        data = organizeDataCount(getColumnFromCSV(csv, colName))
+
+        # Extract labels and values from the data
         labels = data.keys()
         sizes = data.values()
-        
+
         # Create a new figure for the pie chart
         plt.figure()
         plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
@@ -193,21 +212,27 @@ def piechartToImage(data: dict, title: str) -> bytes:
         buf = io.BytesIO()
         plt.savefig(buf, format="png")
         buf.seek(0)
-        
+
         # Convert to base64
-        encoded_image = base64.b64encode(buf.getvalue()).decode('utf-8')
-        
+        encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
         # Cleanup
         plt.close("all")
         buf.close()
-        
+
         # Emit the image
-        emit('image_received',
-             {'image_data': encoded_image, 'format': 'png'},
-             broadcast=True)
+        emit(
+            "image_received",
+            {"image_data": encoded_image, "format": "png"},
+            broadcast=True,
+        )
+
+        return f"Successfully generated and emitted pie chart for column '{colName}'"
     except Exception as e:
-        print(f"Error generating pie chart: {str(e)}")
-        emit('error', {'msg': f"Error generating pie chart: {str(e)}"})
+        error_msg = f"Error generating pie chart: {str(e)}"
+        print(error_msg)
+        emit("error", {"msg": error_msg})
+        return error_msg
     finally:
         plt.close("all")  # Ensure all figures are closed
 
