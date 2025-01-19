@@ -20,7 +20,7 @@ def create_assistant(client):
         name="Data Helper",
         instructions="You are a smart data bot, help the user analyse data",
         tools=[{"type": "code_interpreter"}],
-        model="gpt-4o",
+        model="gpt-4o-mini",
     )
 
 def create_thread(client):

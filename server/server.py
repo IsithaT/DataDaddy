@@ -143,12 +143,32 @@ def handle_send_csv(data):
     Emits:
         A status message confirming receipt of the CSV file.
     """
-    # thread_id = data.get('thread_id')
-    csv_content = data
+    thread_id = data.get('thread_id')
+    csv_content = data.get('csvContent')
+    headers =  (csv_content)
+
+    run = run_assistant(
+        client, 
+        thread_id, 
+        assistant.id, 
+        f"The user is working with a csv file with the following columns, {str(headers)}"
+    )
 
     # if not thread_id or not csv_content:
     #     emit('error', {'msg': 'Missing thread_id or CSV content'})
     #     return
+    
+
+    messages = list_messages(client, thread_id)
+    emit('message_received', {
+        'thread_id': thread_id,
+        'messages': [
+            {
+                'role': msg.role,
+                'content': msg.content[0].text.value
+            } for msg in messages.data
+        ]
+    }, room=thread_id)
 
     print("ASSDD", csv_content)
     # Emit confirmation to the client

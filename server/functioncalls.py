@@ -178,6 +178,9 @@ def getRowFromCSV(csv_string: str, row_name: str) -> list:
     else:
         raise ValueError(f"Row '{row_name}' not found in CSV")
 
+
+
+
 # def countMatchAmount (data: list, match) -> int:
 #     for x in data:
 #         if x == match:
