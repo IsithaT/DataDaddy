@@ -146,10 +146,11 @@ def histoToImage(
             p = np.exp(-0.5 * ((x - mean) / std_dev) ** 2) / (std_dev * np.sqrt(2 * np.pi))
             plt.plot(x, p, color="#d62728", linewidth=2)
 
-        plt.xlabel(xaxis)
-        plt.ylabel(yaxis)
-        plt.title(title)
-        plt.gca().yaxis.set_major_formatter(FuncFormatter(format_yaxis))
+    plt.xlabel(xaxis)
+    plt.ylabel(yaxis)
+    plt.title(title)
+    plt.gca().yaxis.set_major_formatter(FuncFormatter(format_yaxis))
+    fig = plt.gcf()
 
         # Save to buffer
         buf = io.BytesIO()
@@ -181,19 +182,34 @@ def piechartToImage(data: dict, title: str) -> bytes:
         plt.figure()
         labels = data.keys()
         sizes = data.values()
+        
+        # Create a new figure for the pie chart
+        plt.figure()
         plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
         plt.axis("equal")
         plt.title(title)
 
+        # Save to buffer
         buf = io.BytesIO()
         plt.savefig(buf, format="png")
         buf.seek(0)
-        data = buf.getvalue()
+        
+        # Convert to base64
+        encoded_image = base64.b64encode(buf.getvalue()).decode('utf-8')
+        
+        # Cleanup
+        plt.close("all")
         buf.close()
-        plt.close("all")
-        return data
+        
+        # Emit the image
+        emit('image_received',
+             {'image_data': encoded_image, 'format': 'png'},
+             broadcast=True)
+    except Exception as e:
+        print(f"Error generating pie chart: {str(e)}")
+        emit('error', {'msg': f"Error generating pie chart: {str(e)}"})
     finally:
-        plt.close("all")
+        plt.close("all")  # Ensure all figures are closed
 
 
 def scatterplotToImage(
@@ -479,4 +495,3 @@ def searchRowDetails(colName: str, query: str, limit: int = 5) -> str:
         result += "\n"
 
     return result
-
