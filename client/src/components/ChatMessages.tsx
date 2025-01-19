@@ -5,9 +5,10 @@ import { config } from '../config';
 interface ChatMessagesProps {
     messages: Message[];
     onSendMessage: (content: string) => void;
+    onClear: () => void;
 }
 
-export default function ChatMessages({ messages, onSendMessage }: ChatMessagesProps) {
+export default function ChatMessages({ messages, onSendMessage, onClear }: ChatMessagesProps) {
     const [newMessage, setNewMessage] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -45,8 +46,8 @@ export default function ChatMessages({ messages, onSendMessage }: ChatMessagesPr
     };
 
     return (
-        <div className="w-full mx-auto">
-            <div className="bg-white rounded-lg shadow-sm border border-excel-300 h-[600px] overflow-y-auto py-4 px-12 mb-4 scroll-smooth">
+        <div className="h-full flex flex-col">
+            <div className="flex-1 bg-white rounded-lg shadow-sm border border-excel-300 overflow-y-auto py-4 px-12 mb-4 scroll-smooth">
                 <div className="max-w-3xl mx-auto">
                     {messages.map((message, index) => (
                         <div
@@ -75,7 +76,7 @@ export default function ChatMessages({ messages, onSendMessage }: ChatMessagesPr
                                 </div>
 
                             ))}
-                            <br/>
+                            <br />
                             <hr />
                         </div>
                     ))}
@@ -87,7 +88,7 @@ export default function ChatMessages({ messages, onSendMessage }: ChatMessagesPr
                     <div ref={messagesEndRef} />
                 </div>
             </div>
-            <form onSubmit={handleSubmit} className="flex gap-2 max-w-3xl mx-auto">
+            <form onSubmit={handleSubmit} className="flex gap-2 w-full mx-auto">
                 <input
                     type="text"
                     value={newMessage}
@@ -97,6 +98,13 @@ export default function ChatMessages({ messages, onSendMessage }: ChatMessagesPr
                 />
                 <button type="submit" className="px-6 py-3 text-lg">
                     Send
+                </button>
+                <button
+                    onClick={onClear}
+                    type="button"
+                    className='px-6 py-3 text-lg bg-red-200 text-red-700 border border-red-300 rounded-lg hover:bg-red-400 hover:border-red-500 hover:text-red-950'
+                >
+                    Clear
                 </button>
             </form>
         </div >
