@@ -35,23 +35,38 @@ export function useChat() {
 
         socket.on('message_received', (data: MessageReceivedPayload) => {
             console.log('Received messages:', data);
-            if (data.messages.length !== 2) {
-                data.messages.reverse();
-            }
             setContext(prev => {
-                // Get all existing messages that aren't in the new message set
+                // Add timestamps to new messages if they don't have them
+                const newMessages = data.messages.map(msg => ({
+                    ...msg,
+                    timestamp: msg.timestamp || new Date()
+                }));
+
+                // Special handling for initial CSV messages
+                if (prev.messages.length === 0 && newMessages.length === 2) {
+                    // Ensure the "I've loaded a CSV file" message comes first
+                    newMessages.sort((a, b) => {
+                        if (a.content.includes("I've loaded a CSV file")) return -1;
+                        if (b.content.includes("I've loaded a CSV file")) return 1;
+                        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+                    });
+                }
+
+                // Get existing messages that aren't duplicates
                 const existingMessages = prev.messages.filter(msg =>
-                    !data.messages.some(newMsg =>
+                    !newMessages.some(newMsg =>
                         newMsg.content === msg.content && newMsg.role === msg.role
                     )
                 );
 
-                // Add new messages in reverse order (newest first)
-                const newMessages = data.messages.reverse();
+                // Combine and sort all messages by timestamp
+                const allMessages = [...existingMessages, ...newMessages].sort(
+                    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+                );
 
                 return {
                     ...prev,
-                    messages: [...existingMessages, ...newMessages]
+                    messages: allMessages
                 };
             });
             setIsTyping(false);
