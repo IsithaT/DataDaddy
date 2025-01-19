@@ -357,5 +357,134 @@ AItools = [
         "strict": False
     }
 },
-    
+    {
+        "type": "function",
+        "function": {
+            "name": "calculateMeanfromList",
+            "description": "Calculate the mean of a given list of numbers. Can optionally exclude outliers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "The list of numbers to calculate the mean from",
+                    },
+                    "exclude_outliers": {
+                        "type": "boolean",
+                        "description": "Whether to exclude statistical outliers (values beyond 1.5 IQR). Defaults to false."
+                    }
+                },
+                "required": ["data"],
+                "additionalProperties": False,
+            },
+            "strict": False,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculateMedianfromList",
+            "description": "Calculate the median of a given list of numbers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "The list of numbers to calculate the median from",
+                    }
+                },
+                "required": ["data"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculateModefromList",
+            "description": "Calculate the mode (most frequent value) of a given list of numbers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "The list of numbers to calculate the mode from",
+                    }
+                },
+                "required": ["data"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculateVariancefromList",
+            "description": "Calculate the variance of a given list of numbers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "The list of numbers to calculate the variance from",
+                    }
+                },
+                "required": ["data"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculateStandardDeviationfromList",
+            "description": "Calculate the standard deviation of a given list of numbers.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "The list of numbers to calculate the standard deviation from",
+                    }
+                },
+                "required": ["data"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "bargraphToImagefromList",
+            "description": "Generates a bar graph visualization from a list of values, showing the frequency or count of each unique value. The graph is automatically emitted to all connected clients.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "The list of values to visualize",
+                    },
+                    "xaxis": {"type": "string", "description": "Label for the x-axis"},
+                    "yaxis": {"type": "string", "description": "Label for the y-axis"},
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the bar graph",
+                    },
+                },
+                "required": ["data", "xaxis", "yaxis", "title"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
 ]
