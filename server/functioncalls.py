@@ -5,8 +5,13 @@ from collections import Counter
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
 
+csv = ""
+def setcsv(inputcsv: str) -> str: 
+    global csv
+    csv = inputcsv
 
-def calculateMean(data: list) -> float:
+def calculateMean(colName: str) -> float:
+    data = getColumnFromCSV(csv, colName)
     return sum(data)/len(data)
 
 def calculateMedian(data: list) -> float:

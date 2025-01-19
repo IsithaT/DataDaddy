@@ -171,13 +171,14 @@ def handle_send_csv(data):
 
     print("ASSDD", csv_content)
     names = getFirstRowFromCSV(csv_content)
+    setcsv(csv_content)  
     print("NAMES", names)
     # Emit confirmation to the client
     # emit('csv_received', {
     #     # 'thread_id': thread_id,
     #     'status': 'received'
     # }, room=thread_id)
-
+    calculateMedian("Burgers")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5001)
