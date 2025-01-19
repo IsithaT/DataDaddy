@@ -116,5 +116,20 @@ def handle_send_message(data):
         ]
     }, room=thread_id)
 
+@socketio.on('clear_thread')
+def handle_clear_thread(data):
+    """
+    Clears all messages in a specific chat thread.
+    Args:
+        data: Dictionary containing thread_id to clear
+    Emits a status message confirming the thread clear operation.
+    """
+    thread_id = data.get('thread_id')
+    if thread_id in active_threads:
+        active_threads[thread_id]['messages'] = []
+        emit('thread_cleared', {'thread_id': thread_id, 'status': 'cleared'}, room=thread_id)
+    else:
+        emit('error', {'msg': 'Invalid thread_id'})
+
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5001)
