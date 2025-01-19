@@ -162,10 +162,13 @@ def getFirstRowFromCSV(csv_string: str) -> list:
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')), index_col=0)
     return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df.iloc[0].tolist()]
     
-def getFirstColumnFromCSV(csv_string: str) -> list:
+def getColumnFromCSV(csv_string: str, col_name: str) -> list:
     cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace('\\n', '\n')))
-    return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df[df.columns[0]].tolist()]
+    if col_name in df.columns:
+        return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df[col_name].tolist()]
+    else:
+        raise ValueError(f"Column '{col_name}' not found in CSV")
 
 def getRowFromCSV(csv_string: str, row_name: str) -> list:
     cleaned_csv_string = csv_string.rstrip(',')  # Remove trailing comma
