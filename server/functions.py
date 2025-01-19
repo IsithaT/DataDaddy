@@ -19,7 +19,7 @@ AItools = [
                 "required": ["colName"],
                 "additionalProperties": False,
             },
-            "strict": True,
+            "strict": False,
         },
     },
     {
@@ -251,7 +251,7 @@ AItools = [
     {
         "type": "function",
         "function": {
-            "name": "piechartToImage",
+            "name": "colNameToPiechart",
             "description": "Generates a pie chart visualization from a column of data, showing the proportion of each unique value. The chart is automatically emitted to all connected clients.",
             "parameters": {
                 "type": "object",
@@ -302,7 +302,7 @@ AItools = [
 {
   "type": "function",
   "function": {
-    "name": "piechartList",
+    "name": "listToPiechart",
     "description": "Generates a pie chart image from the provided data list and emits the image via WebSocket to all connected clients. Can be used in conjunction with get_filtered_results_from_string",
     "parameters": {
       "type": "object",
@@ -312,7 +312,7 @@ AItools = [
           "items": {
             "type": "string"
           },
-          "description": "A list of all the values used to calculate proportions for the pie chart."
+          "description": "A list of all the values, under the specific head. list repeats values to count occurences"
         },
         "title": {
           "type": "string",
@@ -354,7 +354,7 @@ AItools = [
             "required": ["col1", "col2", "title"],
             "additionalProperties": False
         },
-        "strict": True
+        "strict": False
     }
 },
     

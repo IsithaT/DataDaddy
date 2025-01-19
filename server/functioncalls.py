@@ -193,7 +193,7 @@ def histoToImage(
         plt.close("all")
 
 
-def piechartToImage(colName: str, title: str) -> str:
+def colNameToPiechart(colName: str, title: str) -> str:
     """
     Generates a pie chart image from the provided column data and emits the image via WebSocket to all clients.
 
@@ -248,7 +248,7 @@ def piechartToImage(colName: str, title: str) -> str:
 
 
 
-def piechartList(valSet: list, title: str) -> str:
+def listToPiechart(valSet: list, title: str) -> str:
     """
     Generates a pie chart image from the provided column data and emits the image via WebSocket to all clients.
 
@@ -292,7 +292,7 @@ def piechartList(valSet: list, title: str) -> str:
             broadcast=True,
         )
 
-        return f"Successfully generated and emitted pie chart for column '{colName}'"
+        return f"Successfully generated and emitted pie chart"
     except Exception as e:
         error_msg = f"Error generating pie chart: {str(e)}"
         print(error_msg)

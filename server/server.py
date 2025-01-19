@@ -138,9 +138,9 @@ def handle_send_message(data):
                     "bargraphToImage": bargraphToImage,  # Add the new graph function
                     "histoToImage": histoToImage,  # Add the histogram function
                     "bargraphToImage": bargraphToImage,
-                    "piechartToImage": piechartToImage,  # Add the new graph function
+                    "colNameToPiechart": colNameToPiechart,  # Add the new graph function
                     "get_filtered_results_from_string":get_filtered_results_from_string,
-                    "piechartList": piechartList,
+                    "listToPiechart": listToPiechart,
                     "correlationAnalysis": correlationAnalysis
                 }
 
