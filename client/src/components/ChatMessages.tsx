@@ -6,11 +6,11 @@ interface ChatMessagesProps {
     messages: Message[];
     onSendMessage: (content: string) => void;
     onClear: () => void;
+    isTyping: boolean;
 }
 
-export default function ChatMessages({ messages, onSendMessage, onClear }: ChatMessagesProps) {
+export default function ChatMessages({ messages, onSendMessage, onClear, isTyping }: ChatMessagesProps) {
     const [newMessage, setNewMessage] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -37,11 +37,8 @@ export default function ChatMessages({ messages, onSendMessage, onClear }: ChatM
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (newMessage.trim()) {
-            setIsTyping(true);
             onSendMessage(newMessage);
             setNewMessage('');
-            // Reset typing indicator after response
-            setTimeout(() => setIsTyping(false), 1000);
         }
     };
 
