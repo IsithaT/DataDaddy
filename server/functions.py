@@ -172,4 +172,35 @@ AItools = [
             "strict": False,
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "bargraphToImage",
+            "description": "Generates a bar graph visualization from a column of data, showing the frequency or count of each unique value. The graph is automatically emitted to all connected clients.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "colName": {
+                        "type": "string",
+                        "description": "The name of the column to visualize"
+                    },
+                    "xaxis": {
+                        "type": "string",
+                        "description": "Label for the x-axis"
+                    },
+                    "yaxis": {
+                        "type": "string",
+                        "description": "Label for the y-axis"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the bar graph"
+                    }
+                },
+                "required": ["colName", "xaxis", "yaxis", "title"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
 ]

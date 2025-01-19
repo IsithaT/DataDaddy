@@ -12,6 +12,9 @@ from llm import (
 )
 import json
 import time
+from PIL import Image
+from io import BytesIO
+import base64
 
 # Base instructions for the assistant
 BASE_INSTRUCTIONS = """You are a smart data analysis assistant. Help users understand and analyze their data using the tools available to you. Always reference the data structure and content in your responses."""
@@ -134,6 +137,7 @@ def handle_send_message(data):
                     "getColumnInfo": getColumnInfo,
                     "searchValue": searchValue,
                     "searchRowDetails": searchRowDetails,  # Add the new search function
+                    "bargraphToImage": bargraphToImage,  # Add the new graph function
                 }
 
                 # Process each tool call and collect outputs

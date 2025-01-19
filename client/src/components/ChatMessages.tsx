@@ -2,15 +2,27 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
 import { config } from '../config';
+import ImageCarousel from './ImageCarousel';
 
 interface ChatMessagesProps {
     messages: Message[];
     onSendMessage: (content: string) => void;
     onClear: () => void;
     isTyping: boolean;
+    images: Attachment[];
+    isImageCarouselOpen: boolean;
+    setIsImageCarouselOpen: (isOpen: boolean) => void;
 }
 
-export default function ChatMessages({ messages, onSendMessage, onClear, isTyping }: ChatMessagesProps) {
+export default function ChatMessages({ 
+    messages, 
+    onSendMessage, 
+    onClear, 
+    isTyping,
+    images,
+    isImageCarouselOpen,
+    setIsImageCarouselOpen 
+}: ChatMessagesProps) {
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -59,28 +71,15 @@ export default function ChatMessages({ messages, onSendMessage, onClear, isTypin
                             }`}>
                                 {message.role === 'assistant' ? config.assistant.name : 'You'}:
                             </div>
-                            <div className={`text-gray-800 prose max-w-none ${
-                                message.role === 'user' ? 'text-right' : 'text-left'
-                            }`}>
-                                <ReactMarkdown>
-                                    {message.content}
-                                </ReactMarkdown>
-                            </div>
-                            {message.attachments?.map((attachment, i) => (
-                                <div key={i} className="mt-2">
-                                    <img
-                                        src={attachment.url}
-                                        alt={attachment.caption || 'Analysis visualization'}
-                                        className="rounded-lg border border-excel-300 w-full"
-                                    />
-                                    {attachment.caption && (
-                                        <p className="text-sm text-excel-600 mt-1 italic">
-                                            {attachment.caption}
-                                        </p>
-                                    )}
+                            {message.content && (
+                                <div className={`text-gray-800 prose max-w-none ${
+                                    message.role === 'user' ? 'text-right' : 'text-left'
+                                }`}>
+                                    <ReactMarkdown>
+                                        {message.content}
+                                    </ReactMarkdown>
                                 </div>
-
-                            ))}
+                            )}
                         </div>
                     ))}
                     {isTyping && (
@@ -93,6 +92,13 @@ export default function ChatMessages({ messages, onSendMessage, onClear, isTypin
                     <div ref={messagesEndRef} />
                 </div>
             </div>
+
+            <ImageCarousel
+                images={images}
+                isOpen={isImageCarouselOpen}
+                onClose={() => setIsImageCarouselOpen(false)}
+            />
+
             <form onSubmit={handleSubmit} className="flex gap-2 w-full mx-auto">
                 <input
                     type="text"

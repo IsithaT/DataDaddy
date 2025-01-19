@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Message, ChatContext } from '../types';
+import { Message, ChatContext, Attachment } from '../types';
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5001');
@@ -8,6 +8,8 @@ export function useChat() {
     const [context, setContext] = useState<ChatContext>({ messages: []});
     const [threadId, setThreadId] = useState<string | null>(null);
     const [isTyping, setIsTyping] = useState(false);
+    const [images, setImages] = useState<Attachment[]>([]);
+    const [isImageCarouselOpen, setIsImageCarouselOpen] = useState(false);
 
     useEffect(() => {
         socket.on('thread_created', (data) => {
@@ -25,13 +27,23 @@ export function useChat() {
         });
 
         socket.on('message_received', (data) => {
-            console.log(data);
-            // Ensure messages are stored in chronological order
-            const reversedMessages = data.messages.reverse();
-            setContext(prev => ({
-                ...prev,
-                messages: reversedMessages
-            }));
+            console.log('Received messages:', data);
+            setContext(prev => {
+                // Get all existing messages that aren't in the new message set
+                const existingMessages = prev.messages.filter(msg => 
+                    !data.messages.some(newMsg => 
+                        newMsg.content === msg.content && newMsg.role === msg.role
+                    )
+                );
+                
+                // Add new messages in reverse order (newest first)
+                const newMessages = data.messages.reverse();
+                
+                return {
+                    ...prev,
+                    messages: [...existingMessages, ...newMessages]
+                };
+            });
             setIsTyping(false);
         });
 
@@ -40,15 +52,18 @@ export function useChat() {
         });
 
         socket.on('image_received', (data) => {
+            const newImage: Attachment = {
+                url: `data:image/png;base64,${data.image_data}`,
+                caption: 'Data visualization',
+                type: 'image'
+            };
+            setImages(prev => [...prev, newImage]);
+            
+            // Add a text message about the visualization
             const imageMessage: Message = {
                 role: 'assistant',
-                content: 'Sent an image',
-                timestamp: new Date(),
-                attachments: [{
-                    url: `data:image/png;base64,${data.image_data}`,
-                    caption: 'Generated image',
-                    type: 'image'
-                }]
+                content: 'I\'ve generated a new visualization. Click the "View Visualizations" button to see it.',
+                timestamp: new Date()
             };
             setContext(prev => ({
                 ...prev,
@@ -107,6 +122,7 @@ export function useChat() {
     const clearContext = () => {
         if (!threadId) return;
         socket.emit('clear_thread', { thread_id: threadId });
+        setImages([]);
     };
 
     return {
@@ -114,6 +130,9 @@ export function useChat() {
         handleSendMessage,
         handleFileAnalysis,
         clearContext,
-        isTyping
+        isTyping,
+        images,
+        isImageCarouselOpen,
+        setIsImageCarouselOpen
     };
 }

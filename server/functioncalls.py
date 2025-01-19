@@ -4,9 +4,12 @@ import io
 from collections import Counter
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to non-interactive mode
 
 
 csv = ""
+
 
 def setcsv(inputcsv: str) -> str:
     global csv
@@ -47,10 +50,10 @@ def calculateMode(colName: str) -> str:
         # Get frequency of each value
         frequencies = Counter(numeric_data)
         max_freq = max(frequencies.values())
-        
+
         # Find all values that appear with maximum frequency
         modes = [x for x, freq in frequencies.items() if freq == max_freq]
-        
+
         # Handle different cases
         if max_freq == 1:
             return "No mode - all values appear once"
@@ -58,7 +61,7 @@ def calculateMode(colName: str) -> str:
             return str(modes[0])
         else:
             return f"Multiple modes: {', '.join(str(m) for m in sorted(modes))}"
-            
+
     except (ValueError, TypeError):
         return f"Error: Column '{colName}' contains non-numeric values"
 
@@ -142,20 +145,23 @@ def histoToImage(
 
 
 def piechartToImage(data: dict, title: str) -> bytes:
-    plt.clf()  # Clear any existing plots
-    labels = data.keys()
-    sizes = data.values()
-    fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
-    ax1.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle.
-    plt.title(title)
-    fig = plt.gcf()
-
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Clean up the plot
-    return buf.getvalue()
+    try:
+        plt.figure()
+        labels = data.keys()
+        sizes = data.values()
+        plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+        plt.axis('equal')
+        plt.title(title)
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        data = buf.getvalue()
+        buf.close()
+        plt.close('all')
+        return data
+    finally:
+        plt.close('all')
 
 
 def scatterplotToImage(
@@ -191,7 +197,8 @@ import io
 import matplotlib.pyplot as plt
 from flask_socketio import emit
 
-def bargraphToImage(data: dict, xaxis: str, yaxis: str, title: str) -> None:
+
+def bargraphToImage(colName: str, xaxis: str, yaxis: str, title: str) -> None:
     """
     Generates a bar graph image from the provided data and emits the image via WebSocket to all clients.
 
@@ -203,29 +210,40 @@ def bargraphToImage(data: dict, xaxis: str, yaxis: str, title: str) -> None:
 
     Emits the generated bar graph image as Base64-encoded PNG data to all connected clients.
     """
-    plt.clf()  # Clear any existing plots
-    labels = data.keys()
-    values = data.values()
-    plt.bar(labels, values, color=(33 / 255, 127 / 255, 85 / 255))
-    plt.xlabel(xaxis)
-    plt.ylabel(yaxis)
-    plt.title(title)
-    fig = plt.gcf()
-
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Clean up the plot
-
-    # Convert image to Base64-encoded string
-    encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
-
-    # Emit the image data to all connected clients via WebSocket
-    emit(
-        "image_received",
-        {"image_data": encoded_image, "format": "png"},
-        broadcast=True  # This ensures all clients connected to the WebSocket will receive the image
-    )
+    try:
+        data = organizeDataCount(getColumnFromCSV(csv, colName))
+        
+        # Create a new figure for each plot
+        plt.figure()
+        
+        labels = data.keys()
+        values = data.values()
+        plt.bar(labels, values, color=(33/255, 127/255, 85/255))
+        plt.xlabel(xaxis)
+        plt.ylabel(yaxis)
+        plt.title(title)
+        
+        # Save to buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        
+        # Convert to base64
+        encoded_image = base64.b64encode(buf.getvalue()).decode('utf-8')
+        
+        # Cleanup
+        plt.close('all')
+        buf.close()
+        
+        # Emit the image
+        emit('image_received',
+             {'image_data': encoded_image, 'format': 'png'},
+             broadcast=True)
+    except Exception as e:
+        print(f"Error generating bar graph: {str(e)}")
+        emit('error', {'msg': f"Error generating bar graph: {str(e)}"})
+    finally:
+        plt.close('all')  # Ensure all figures are closed
 
 
 def plotgraphToImage(
@@ -236,22 +254,26 @@ def plotgraphToImage(
     title: str,
     show_points: bool = False,
 ) -> bytes:
-    plt.clf()  # Clear any existing plots
-    plt.plot(xdata, ydata, color=(33 / 255, 127 / 255, 85 / 255))
-
-    if show_points:
-        plt.scatter(xdata, ydata, color="red")  # Add points on the graph
-
-    plt.xlabel(xaxis)
-    plt.ylabel(yaxis)
-    plt.title(title)
-    fig = plt.gcf()
-
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Clean up the plot
-    return buf.getvalue()
+    try:
+        plt.figure()
+        plt.plot(xdata, ydata, color=(33/255, 127/255, 85/255))
+        
+        if show_points:
+            plt.scatter(xdata, ydata, color='red')
+            
+        plt.xlabel(xaxis)
+        plt.ylabel(yaxis)
+        plt.title(title)
+        
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        data = buf.getvalue()
+        buf.close()
+        plt.close('all')
+        return data
+    finally:
+        plt.close('all')
 
 
 def modedecimalplaces(data: list) -> int:
@@ -291,7 +313,7 @@ def getFirstDataRowFromCSV(csv_string: str) -> list:
     try:
         rows = csv_string.strip().split("\n")
         if len(rows) > 1:  # Ensure there is at least one data row
-            first_data_row = [value.strip('\r') for value in rows[1].split(",")]
+            first_data_row = [value.strip("\r") for value in rows[1].split(",")]
             print(f"Extracted first data row: {first_data_row}")
             return first_data_row
         else:
@@ -325,19 +347,22 @@ def getRowFromCSV(csv_string: str, row_name: str) -> list:
     else:
         raise ValueError(f"Row '{row_name}' not found in CSV")
 
+
 def countRowsInCSV(csv_string: str) -> int:
     cleaned_csv_string = csv_string.rstrip(",")  # Remove trailing comma
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
     return len(df.index)
 
+
 def organizeDataCount(data: list) -> dict:
     return dict(Counter(data))
+
 
 def getColumnInfo(colName: str) -> str:
     """Get detailed information about a specific column in the CSV data"""
     cleaned_csv_string = csv.rstrip(",")
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
-    
+
     if colName in df.columns:
         col_data = df[colName]
         info = f"Column '{colName}' analysis:\n"
@@ -357,48 +382,54 @@ def getColumnInfo(colName: str) -> str:
         return info
     return f"Column '{colName}' not found in the data"
 
+
 def searchValue(query: str) -> str:
     """Search for a specific value across all columns in the CSV data"""
     cleaned_csv_string = csv.rstrip(",")
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
-    
+
     results = []
     for column in df.columns:
-        matches = df[df[column].astype(str).str.contains(str(query), case=False, na=False)]
+        matches = df[
+            df[column].astype(str).str.contains(str(query), case=False, na=False)
+        ]
         if not matches.empty:
             unique_matches = matches[column].unique()
-            match_preview = ', '.join([str(x) for x in unique_matches[:3]])
+            match_preview = ", ".join([str(x) for x in unique_matches[:3]])
             if len(unique_matches) > 3:
                 match_preview += f", ... and {len(unique_matches)-3} more"
-            results.append(f"- Column '{column}': {len(matches)} matches found\n"
-                         f"  Example matches: {match_preview}")
-    
+            results.append(
+                f"- Column '{column}': {len(matches)} matches found\n"
+                f"  Example matches: {match_preview}"
+            )
+
     if results:
         return f"Search results for '{query}':\n" + "\n".join(results)
     return f"No matches found for '{query}' in any column"
+
 
 def searchRowDetails(colName: str, query: str, limit: int = 5) -> str:
     """Search for rows where a specific column contains the query and return detailed information"""
     cleaned_csv_string = csv.rstrip(",")
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
-    
+
     if colName not in df.columns:
         return f"Column '{colName}' not found in the data"
-    
+
     matches = df[df[colName].astype(str).str.contains(str(query), case=False, na=False)]
-    
+
     if matches.empty:
         return f"No matches found for '{query}' in column '{colName}'"
-    
+
     total_matches = len(matches)
     matches = matches.head(limit)  # Only take the requested number of matches
-    
+
     result = f"Found {total_matches} rows where {colName} contains '{query}':\n"
     if total_matches > limit:
         result += f"(Showing first {limit} matches)\n\n"
     else:
         result += "\n"
-    
+
     for idx, row in matches.iterrows():
         result += f"Match #{idx+1}:\n"
         for col in df.columns:
@@ -407,5 +438,5 @@ def searchRowDetails(colName: str, query: str, limit: int = 5) -> str:
                 value = "N/A"
             result += f"- {col}: {value}\n"
         result += "\n"
-    
+
     return result
