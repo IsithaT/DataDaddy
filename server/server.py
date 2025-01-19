@@ -139,6 +139,7 @@ def handle_send_message(data):
                     "histoToImage": histoToImage,  # Add the histogram function
                     "bargraphToImage": bargraphToImage,
                     "piechartToImage": piechartToImage,  # Add the new graph function
+                    "correlationAnalysis": correlationAnalysis,
                 }
 
                 # Process each tool call and collect outputs
