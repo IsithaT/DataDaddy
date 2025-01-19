@@ -131,5 +131,34 @@ def handle_clear_thread(data):
     else:
         emit('error', {'msg': 'Invalid thread_id'})
 
+
+
+@socketio.on('send_csv')
+def handle_send_csv(data):
+    """
+    Handles receiving a CSV file from the client.
+    Args:
+        data: Dictionary containing thread_id and file contents in CSV format.
+    Emits:
+        A status message confirming receipt of the CSV file.
+    """
+    # thread_id = data.get('thread_id')
+    csv_content = data
+
+    # if not thread_id or not csv_content:
+    #     emit('error', {'msg': 'Missing thread_id or CSV content'})
+    #     return
+
+    print("ASSDD", csv_content)
+    # Emit confirmation to the client
+    # emit('csv_received', {
+    #     # 'thread_id': thread_id,
+    #     'status': 'received'
+    # }, room=thread_id)
+
+
+
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5001)
+
+
