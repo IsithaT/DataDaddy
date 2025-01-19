@@ -313,7 +313,6 @@ def colNameToPiechart(colName: str, title: str) -> str:
         plt.close("all")  # Ensure all figures are closed
 
 
-
 def listToPiechart(valSet: list, title: str) -> str:
     """
     Generates a pie chart image from the provided column data and emits the image via WebSocket to all clients.
@@ -368,34 +367,69 @@ def listToPiechart(valSet: list, title: str) -> str:
         plt.close("all")  # Ensure all figures are closed
 
 
-def get_filtered_results_from_string(query_param, query_value, target_param):
+def get_filtered_results_from_string(query_param: str, query_value: str, target_param: str) -> list:
     """
     Fetches a list of values from the target column based on a specific filter in another column.
 
-    :param query_param: The column name to apply the filter on.
-    :param query_value: The value to filter by.
-    :param target_param: The column name to retrieve values from.
-    :return: List of results from the target column.
+    Args:
+        query_param: The column name to apply the filter on.
+        query_value: The value to filter by.
+        target_param: The column name to retrieve values from.
+
+    Returns:
+        List of results from the target column.
+
+    Raises:
+        ValueError: If columns not found or data format is invalid.
     """
-    # Split the CSV string into rows
-    rows = csv.strip().split('\n')
-    # Extract headers from the first row
-    headers = rows[0].split(',')
+    try:
+        # Input validation
+        if not all(isinstance(x, str) for x in [query_param, query_value, target_param]):
+            raise ValueError("All parameters must be strings")
+        
+        if not csv.strip():
+            raise ValueError("CSV data is empty")
 
-    # Get the indices of the query and target columns
-    query_index = headers.index(query_param)
-    target_index = headers.index(target_param)
+        # Parse CSV using pandas for better handling
+        df = pd.read_csv(io.StringIO(csv.strip()))
 
-    # Iterate through the data rows and collect results
-    results = []
-    for row in rows[1:]:
-        columns = row.split(',')
-        if columns[query_index] == query_value:
-            results.append(columns[target_index])
-    print("RESULTS: ", results)
+        # Validate column names
+        if query_param not in df.columns:
+            raise ValueError(f"Query column '{query_param}' not found in data")
+        if target_param not in df.columns:
+            raise ValueError(f"Target column '{target_param}' not found in data")
 
-    return results
+        # Filter rows and get results
+        # Convert to string for consistent comparison
+        mask = df[query_param].astype(str).str.strip() == str(query_value).strip()
+        results = df.loc[mask, target_param].tolist()
 
+        # Handle empty results
+        if not results:
+            print(f"No matches found for '{query_value}' in column '{query_param}'")
+            return []
+
+        # Convert numeric results to float if possible
+        cleaned_results = []
+        for val in results:
+            try:
+                if pd.notna(val):  # Skip NaN values
+                    cleaned_results.append(float(val) if isinstance(val, (int, float)) else val)
+            except (ValueError, TypeError):
+                cleaned_results.append(val)
+
+        print(f"Found {len(cleaned_results)} matches")
+        return cleaned_results
+
+    except pd.errors.EmptyDataError:
+        print("Error: CSV data is empty or malformed")
+        return []
+    except pd.errors.ParserError as e:
+        print(f"Error parsing CSV data: {str(e)}")
+        return []
+    except Exception as e:
+        print(f"Unexpected error in get_filtered_results_from_string: {str(e)}")
+        return []
 
 
 def scatterplotToImage(
@@ -657,7 +691,7 @@ def getColumnInfo(colName: str) -> str:
     cleaned_csv_string = csv.rstrip(",")
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
 
-    if colName in df.columns:
+    if (colName in df.columns):
         col_data = df[colName]
         info = f"Column '{colName}' analysis:\n"
         info += f"- Data type: {col_data.dtype}\n"

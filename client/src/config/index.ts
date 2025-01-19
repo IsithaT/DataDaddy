@@ -1,7 +1,7 @@
 
 export const config = {
     assistant: {
-        name: 'Diddy Kong: Made by Copilot',
+        name: 'Data Dave',
         typingText: 'is analyzing your data...',
     }
 } as const;
