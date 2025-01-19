@@ -141,7 +141,14 @@ def handle_send_message(data):
                     "colNameToPiechart": colNameToPiechart,  # Add the new graph function
                     "get_filtered_results_from_string":get_filtered_results_from_string,
                     "listToPiechart": listToPiechart,
-                    "correlationAnalysis": correlationAnalysis
+                    "correlationAnalysis": correlationAnalysis,
+                    "calculateMeanfromList": calculateMeanfromList,
+                    "calculateMedianfromList": calculateMedianfromList,
+                    "calculateModefromList": calculateModefromList,
+                    "calculateVariancefromList": calculateVariancefromList,
+                    "calculateStandardDeviationfromList": calculateStandardDeviationfromList,
+                    "bargraphToImagefromList": bargraphToImagefromList,
+    
                 }
 
                 # Process each tool call and collect outputs
