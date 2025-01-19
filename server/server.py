@@ -59,7 +59,7 @@ def handle_join_thread(data):
     Emits a status message confirming the room join operation.
     """
     thread_id = data.get("thread_id")
-    if (thread_id):
+    if thread_id:
         join_room(thread_id)
         emit("status", {"msg": f"Joined thread {thread_id}"})
 
@@ -76,7 +76,7 @@ def handle_create_thread():
         "messages": [],
         "csv_data": None,
         "headers": None,
-        "data_row": None
+        "data_row": None,
     }
     join_room(thread.id)
     emit("thread_created", {"thread_id": thread.id, "status": "created"})
@@ -111,9 +111,7 @@ def handle_send_message(data):
 
         # Run assistant with context
         run = client.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=assistant.id,
-            instructions=context
+            thread_id=thread_id, assistant_id=assistant.id, instructions=context
         )
 
         # Poll for run completion and handle function calls
@@ -125,7 +123,7 @@ def handle_send_message(data):
             if run_status.status == "requires_action":
                 tool_calls = run_status.required_action.submit_tool_outputs.tool_calls
                 tool_outputs = []
-                
+
                 # Create a map of all available functions
                 function_map = {
                     "calculateMean": calculateMean,
@@ -133,40 +131,43 @@ def handle_send_message(data):
                     "calculateMode": calculateMode,
                     "calculateVariance": calculateVariance,
                     "calculateStandardDeviation": calculateStandardDeviation,
-                    "countRowsInCSV": lambda: countRowsInCSV(csv),  # Note: Using lambda since it doesn't need parameters
+                    "countRows": countRows,  # Note: Using lambda since it doesn't need parameters
                     "getColumnInfo": getColumnInfo,
                     "searchValue": searchValue,
                     "searchRowDetails": searchRowDetails,  # Add the new search function
                     "bargraphToImage": bargraphToImage,  # Add the new graph function
+                    "histoToImage": histoToImage,  # Add the histogram function
                 }
 
                 # Process each tool call and collect outputs
                 for tool_call in tool_calls:
                     function_name = tool_call.function.name
                     function_args = json.loads(tool_call.function.arguments)
-                    
+
                     try:
                         if function_name in function_map:
+                            print(
+                                f"Executing function: {function_name} with args: {function_args}"
+                            )
                             result = function_map[function_name](**function_args)
                         else:
                             result = f"Function {function_name} not implemented"
-                        
-                        tool_outputs.append({
-                            "tool_call_id": tool_call.id,
-                            "output": str(result)
-                        })
+
+                        tool_outputs.append(
+                            {"tool_call_id": tool_call.id, "output": str(result)}
+                        )
                     except Exception as func_error:
-                        tool_outputs.append({
-                            "tool_call_id": tool_call.id,
-                            "output": f"Error executing {function_name}: {str(func_error)}"
-                        })
+                        tool_outputs.append(
+                            {
+                                "tool_call_id": tool_call.id,
+                                "output": f"Error executing {function_name}: {str(func_error)}",
+                            }
+                        )
 
                 # Submit all tool outputs together
                 if tool_outputs:
                     client.beta.threads.runs.submit_tool_outputs(
-                        thread_id=thread_id,
-                        run_id=run.id,
-                        tool_outputs=tool_outputs
+                        thread_id=thread_id, run_id=run.id, tool_outputs=tool_outputs
                     )
                 continue
 
@@ -226,11 +227,9 @@ def handle_send_csv(data):
         print(f"Processing CSV with headers: {headers}")
 
         # Store CSV info in thread data
-        active_threads[thread_id].update({
-            "csv_data": csv_content,
-            "headers": headers,
-            "data_row": dataRow
-        })
+        active_threads[thread_id].update(
+            {"csv_data": csv_content, "headers": headers, "data_row": dataRow}
+        )
 
         # Store CSV content globally for function calls
         setcsv(csv_content)
@@ -249,18 +248,11 @@ def handle_send_csv(data):
         context += "Please acknowledge this data structure and explain what kind of analysis you can perform based on the column types and content."
 
         message = send_message(
-            client,
-            thread_id,
-            "I've loaded a CSV file. It is ready to be analyzed."
+            client, thread_id, "I've loaded a CSV file. It is ready to be analyzed."
         )
-        
-        run = run_assistant(
-            client,
-            thread_id,
-            assistant.id,
-            context
-        )
-        
+
+        run = run_assistant(client, thread_id, assistant.id, context)
+
         # Get and send response
         messages = list_messages(client, thread_id)
         emit(
@@ -277,7 +269,6 @@ def handle_send_csv(data):
     except Exception as e:
         print(f"CSV Processing Error: {str(e)}")
         emit("error", {"msg": f"Error processing CSV: {str(e)}"})
-
 
 
 @socketio.on("upload_image")
@@ -308,11 +299,12 @@ def handle_upload_image(data):
         emit(
             "image_received",
             {"image_data": encoded_image, "format": "png"},
-            broadcast=True  # This will send to all connected clients
+            broadcast=True,  # This will send to all connected clients
         )
     except Exception as e:
         print(f"Error processing image: {str(e)}")
         emit("error", {"msg": f"Error processing image: {str(e)}"})
+
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, port=5001)

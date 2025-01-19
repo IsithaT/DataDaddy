@@ -5,7 +5,8 @@ from collections import Counter
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # Set the backend to non-interactive mode
+
+matplotlib.use("Agg")  # Set the backend to non-interactive mode
 
 
 csv = ""
@@ -97,51 +98,82 @@ def graphDisplay(data: list) -> str:
 
 
 def histoToImage(
-    data: list,
+    colName: str,
     xaxis: str,
     yaxis: str,
     title: str,
     density: bool = False,
     normal_dist: bool = False,
-    histobin: int = 10,
-) -> bytes:
-    def format_yaxis(y, _):
-        if density:
-            return y
-        else:
-            if int(y) == y:
-                return str(int(y))
-            return ""
+    histobin: int = None,
+) -> str:
+    """
+    Generates a histogram from the specified column and emits the image via WebSocket to all clients.
+    Uses Sturges' formula (k = 1 + log2(n)) to calculate optimal bin count if not specified.
+    """
+    try:
+        data = getColumnFromCSV(csv, colName)
+        if not all(isinstance(x, (int, float)) for x in data):
+            return f"Error: Column '{colName}' contains non-numeric values"
 
-    plt.clf()  # Clear any existing plots
-    data.sort()
-    plt.hist(
-        data,
-        bins=histobin,
-        color=(33 / 255, 127 / 255, 85 / 255),
-        edgecolor="#7ed3aa",
-        density=density,
-    )
+        # Calculate number of bins using Sturges' formula if not specified
+        if histobin is None:
+            n = len(data)
+            histobin = int(1 + np.log2(n))
 
-    if normal_dist:
-        mean = calculateMean(data)
-        std_dev = calculateStandardDeviation(data)
-        xmin, xmax = plt.xlim()
-        x = np.linspace(xmin, xmax, 100)
-        p = np.exp(-0.5 * ((x - mean) / std_dev) ** 2) / (std_dev * np.sqrt(2 * np.pi))
-        plt.plot(x, p, color="#d62728", linewidth=2)
+        def format_yaxis(y, _):
+            if density:
+                return y
+            else:
+                if int(y) == y:
+                    return str(int(y))
+                return ""
 
-    plt.xlabel(xaxis)
-    plt.ylabel(yaxis)
-    plt.title(title)
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(format_yaxis))
-    fig = plt.gcf()
+        plt.figure()
+        data.sort()
+        plt.hist(
+            data,
+            bins=histobin,
+            color=(33/255, 127/255, 85/255),
+            edgecolor="#7ed3aa",
+            density=density,
+        )
 
-    buf = io.BytesIO()
-    fig.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()  # Clean up the plot
-    return buf.getvalue()
+        if normal_dist:
+            mean = calculateMean(colName)
+            std_dev = calculateStandardDeviation(colName)
+            xmin, xmax = plt.xlim()
+            x = np.linspace(xmin, xmax, 100)
+            p = np.exp(-0.5 * ((x - mean) / std_dev) ** 2) / (std_dev * np.sqrt(2 * np.pi))
+            plt.plot(x, p, color="#d62728", linewidth=2)
+
+        plt.xlabel(xaxis)
+        plt.ylabel(yaxis)
+        plt.title(title)
+        plt.gca().yaxis.set_major_formatter(FuncFormatter(format_yaxis))
+
+        # Save to buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+
+        # Convert to base64
+        encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+        # Cleanup
+        plt.close("all")
+        buf.close()
+
+        # Emit the image
+        emit("image_received", {"image_data": encoded_image, "format": "png"}, broadcast=True)
+
+        return f"Successfully generated and emitted histogram for column '{colName}'"
+    except Exception as e:
+        error_msg = f"Error generating histogram: {str(e)}"
+        print(error_msg)
+        emit("error", {"msg": error_msg})
+        return error_msg
+    finally:
+        plt.close("all")
 
 
 def piechartToImage(data: dict, title: str) -> bytes:
@@ -149,19 +181,19 @@ def piechartToImage(data: dict, title: str) -> bytes:
         plt.figure()
         labels = data.keys()
         sizes = data.values()
-        plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
-        plt.axis('equal')
+        plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+        plt.axis("equal")
         plt.title(title)
-        
+
         buf = io.BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format="png")
         buf.seek(0)
         data = buf.getvalue()
         buf.close()
-        plt.close('all')
+        plt.close("all")
         return data
     finally:
-        plt.close('all')
+        plt.close("all")
 
 
 def scatterplotToImage(
@@ -198,7 +230,7 @@ import matplotlib.pyplot as plt
 from flask_socketio import emit
 
 
-def bargraphToImage(colName: str, xaxis: str, yaxis: str, title: str) -> None:
+def bargraphToImage(colName: str, xaxis: str, yaxis: str, title: str) -> str:
     """
     Generates a bar graph image from the provided data and emits the image via WebSocket to all clients.
 
@@ -208,42 +240,49 @@ def bargraphToImage(colName: str, xaxis: str, yaxis: str, title: str) -> None:
         yaxis: Label for the y-axis.
         title: Title of the graph.
 
-    Emits the generated bar graph image as Base64-encoded PNG data to all connected clients.
+    Returns:
+        str: A message indicating success or failure of the operation.
     """
     try:
         data = organizeDataCount(getColumnFromCSV(csv, colName))
-        
+
         # Create a new figure for each plot
         plt.figure()
-        
+
         labels = data.keys()
         values = data.values()
-        plt.bar(labels, values, color=(33/255, 127/255, 85/255))
+        plt.bar(labels, values, color=(33 / 255, 127 / 255, 85 / 255))
         plt.xlabel(xaxis)
         plt.ylabel(yaxis)
         plt.title(title)
-        
+
         # Save to buffer
         buf = io.BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format="png")
         buf.seek(0)
-        
+
         # Convert to base64
-        encoded_image = base64.b64encode(buf.getvalue()).decode('utf-8')
-        
+        encoded_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
         # Cleanup
-        plt.close('all')
+        plt.close("all")
         buf.close()
-        
+
         # Emit the image
-        emit('image_received',
-             {'image_data': encoded_image, 'format': 'png'},
-             broadcast=True)
+        emit(
+            "image_received",
+            {"image_data": encoded_image, "format": "png"},
+            broadcast=True,
+        )
+
+        return f"Successfully generated and emitted bar graph for column '{colName}'"
     except Exception as e:
-        print(f"Error generating bar graph: {str(e)}")
-        emit('error', {'msg': f"Error generating bar graph: {str(e)}"})
+        error_msg = f"Error generating bar graph: {str(e)}"
+        print(error_msg)
+        emit("error", {"msg": error_msg})
+        return error_msg
     finally:
-        plt.close('all')  # Ensure all figures are closed
+        plt.close("all")  # Ensure all figures are closed
 
 
 def plotgraphToImage(
@@ -256,24 +295,24 @@ def plotgraphToImage(
 ) -> bytes:
     try:
         plt.figure()
-        plt.plot(xdata, ydata, color=(33/255, 127/255, 85/255))
-        
+        plt.plot(xdata, ydata, color=(33 / 255, 127 / 255, 85 / 255))
+
         if show_points:
-            plt.scatter(xdata, ydata, color='red')
-            
+            plt.scatter(xdata, ydata, color="red")
+
         plt.xlabel(xaxis)
         plt.ylabel(yaxis)
         plt.title(title)
-        
+
         buf = io.BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format="png")
         buf.seek(0)
         data = buf.getvalue()
         buf.close()
-        plt.close('all')
+        plt.close("all")
         return data
     finally:
-        plt.close('all')
+        plt.close("all")
 
 
 def modedecimalplaces(data: list) -> int:
@@ -348,8 +387,8 @@ def getRowFromCSV(csv_string: str, row_name: str) -> list:
         raise ValueError(f"Row '{row_name}' not found in CSV")
 
 
-def countRowsInCSV(csv_string: str) -> int:
-    cleaned_csv_string = csv_string.rstrip(",")  # Remove trailing comma
+def countRows() -> int:
+    cleaned_csv_string = csv.rstrip(",")  # Remove trailing comma
     df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
     return len(df.index)
 
@@ -440,3 +479,4 @@ def searchRowDetails(colName: str, query: str, limit: int = 5) -> str:
         result += "\n"
 
     return result
+

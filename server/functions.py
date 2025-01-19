@@ -97,12 +97,12 @@ AItools = [
     {
         "type": "function",
         "function": {
-            "name": "countRowsInCSV",
+            "name": "countRows",
             "description": "Count the number of data rows in the CSV file (excluding the header row).",
             "parameters": {
                 "type": "object",
-                "properties": {},  # No parameters needed since it uses the global CSV data
-                "additionalProperties": False,
+                "properties": {},
+                "additionalProperties": False
             },
             "strict": True,
         },
@@ -164,7 +164,7 @@ AItools = [
                     "limit": {
                         "type": "integer",
                         "description": "Maximum number of matching rows to show in detail (optional, defaults to 5)",
-                    }
+                    },
                 },
                 "required": ["colName", "query"],
                 "additionalProperties": False,
@@ -182,7 +182,32 @@ AItools = [
                 "properties": {
                     "colName": {
                         "type": "string",
-                        "description": "The name of the column to visualize"
+                        "description": "The name of the column to visualize",
+                    },
+                    "xaxis": {"type": "string", "description": "Label for the x-axis"},
+                    "yaxis": {"type": "string", "description": "Label for the y-axis"},
+                    "title": {
+                        "type": "string",
+                        "description": "Title of the bar graph",
+                    },
+                },
+                "required": ["colName", "xaxis", "yaxis", "title"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "histoToImage",
+            "description": "Generates a histogram visualization from a column of numeric data, showing the distribution of values. Uses Sturges' formula (k = 1 + log2(n)) to calculate optimal bin count if not specified. The graph is automatically emitted to all connected clients.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "colName": {
+                        "type": "string",
+                        "description": "The name of the column to visualize (must contain numeric values)"
                     },
                     "xaxis": {
                         "type": "string",
@@ -194,13 +219,25 @@ AItools = [
                     },
                     "title": {
                         "type": "string",
-                        "description": "Title of the bar graph"
+                        "description": "Title of the histogram"
+                    },
+                    "density": {
+                        "type": "boolean",
+                        "description": "Whether to normalize the histogram (optional, defaults to false)"
+                    },
+                    "normal_dist": {
+                        "type": "boolean",
+                        "description": "Whether to overlay a normal distribution curve (optional, defaults to false)"
+                    },
+                    "histobin": {
+                        "type": "integer",
+                        "description": "Number of bins for the histogram (optional, if not specified uses Sturges' formula: k = 1 + log2(n))"
                     }
                 },
                 "required": ["colName", "xaxis", "yaxis", "title"],
                 "additionalProperties": False,
             },
-            "strict": True,
+            "strict": False,
         },
     },
 ]
