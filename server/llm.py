@@ -1,6 +1,8 @@
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from functioncalls import *
+from functions import AItools
 
 def load_api_key():
     """Load the OpenAI API key from environment variables."""
@@ -18,8 +20,8 @@ def create_assistant(client):
     """Create an assistant with the specified parameters."""
     return client.beta.assistants.create(
         name="Data Helper",
-        instructions="You are a smart data bot, help the user analyse data",
-        tools=[{"type": "code_interpreter"}],
+        instructions="You are a smart data bot, help the user analyse data, use the tools available to you when it helps.",
+        tools=AItools,
         model="gpt-4o-mini",
     )
 

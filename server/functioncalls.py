@@ -14,12 +14,12 @@ def calculateMean(colName: str) -> float:
     data = getColumnFromCSV(csv, colName)
     return sum(data)/len(data)
 
-def calculateMedian(data: list) -> float:
-    data.sort()
-    if len(data) % 2 == 0:
-        return (data[len(data)//2] + data[len(data)//2-1])/2
-    else:
-        return data[len(data)//2]
+# def calculateMedian(data: list) -> float:
+#     data.sort()
+#     if len(data) % 2 == 0:
+#         return (data[len(data)//2] + data[len(data)//2-1])/2
+#     else:
+#         return data[len(data)//2]
 
 def calculateMode(data: list) -> float:
     mode = max(set(data), key = data.count)

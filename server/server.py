@@ -178,7 +178,7 @@ def handle_send_csv(data):
     #     # 'thread_id': thread_id,
     #     'status': 'received'
     # }, room=thread_id)
-    calculateMedian("Burgers")
+    # calculateMedian("Burgers")
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5001)

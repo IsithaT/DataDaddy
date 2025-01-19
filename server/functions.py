@@ -1,22 +1,24 @@
 
-tools = [{
+AItools = [
+{
     "type": "function",
     "function": {
-        "name": "get_weather",
-        "description": "Get current temperature for a given location.",
+        "name": "calculateMean",
+        "description": "Calculate the mean of a given column in a CSV file.",
         "parameters": {
             "type": "object",
             "properties": {
-                "location": {
+                "colName": {
                     "type": "string",
-                    "description": "City and country e.g. Bogotá, Colombia"
+                    "description": "The name of the column for which the mean should be calculated."
                 }
             },
             "required": [
-                "location"
+                "colName"
             ],
             "additionalProperties": False
         },
         "strict": True
     }
-}]
+}
+]
