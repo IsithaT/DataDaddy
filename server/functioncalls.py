@@ -5,12 +5,17 @@ from collections import Counter
 from matplotlib.ticker import FuncFormatter
 import pandas as pd
 
+
 csv = ""
-def setcsv(inputcsv: str) -> str: 
+def setcsv(inputcsv: str) -> str:
     global csv
+    print(f"Setting CSV data, length: {len(inputcsv)}")
     csv = inputcsv
+    return "CSV data stored"
+
 
 def calculateMean(colName: str) -> float:
+    print(colName, "colName")
     data = getColumnFromCSV(csv, colName)
     return sum(data)/len(data)
 
@@ -164,9 +169,14 @@ def getFirstColumnFromCSV(csv_string: str) -> list:
 
 
 def getFirstRowFromCSV(csv_string: str) -> list:
-    cleaned_csv_string = csv_string.rstrip(",")  # Remove trailing comma
-    df = pd.read_csv(io.StringIO(cleaned_csv_string.replace("\\n", "\n")))
-    return df.columns.tolist()
+    try:
+        rows = csv_string.strip().split("\n")
+        headers = [header.strip('\r') for header in rows[0].split(",")]
+        print(f"Extracted headers: {headers}")
+        return headers
+    except Exception as e:
+        print(f"Error parsing CSV headers: {str(e)}")
+        raise e
 
 
 def getColumnFromCSV(csv_string: str, col_name: str) -> list:
@@ -184,8 +194,6 @@ def getRowFromCSV(csv_string: str, row_name: str) -> list:
         return [float(x) if isinstance(x, (np.integer, np.floating)) else x for x in df.loc[row_name].tolist()]
     else:
         raise ValueError(f"Row '{row_name}' not found in CSV")
-
-
 
 
 # def countMatchAmount (data: list, match) -> int:
