@@ -28,5 +28,5 @@
    
 ### Quick dev run: 
 - Add `OPENAI_API_KEY` to `.env` file in `server`
-- `cd` to `server` directory and run the Python file `server.py` (will have to `pip install`)
+- `cd` to `server` directory and run the Python file `server.py` (will have to `pip install -r requirements.txt`)
 - In another terminal, `cd` to `client` and run `npm run dev` (will have to `npm install`)
