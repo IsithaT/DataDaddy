@@ -2,15 +2,16 @@
 
 ## AI-powered CSV analysis tool that provides instant insights and visualizations from your data, making data analysis accessible and efficient
 
-### Notable Features
+### Notable features
 
-- **Accessible data analysis**
+- **Combats context-loss and AI hallucinations**
+  - Heavily limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
+  - Makes use of fine-tuned and prompt-engineered functions to make sure the assistant doesn't spew out random/false data
+- **Accessible, code-free data analysis**
   - Upload your CSV file and get instant insights and visualizations from your prompts
-  - No coding and/or Excel functions required!
+  - No coding and/or Excel knowledge required!
 - **Real-time data analysis**
   - Chat-based interaction allows you to quick adjust your prompts and get feedback
-- **Context-loss combating**
-  - Heavily Limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
 - **Data visualization**
   - Get visualizations of your data in the form of graphs and charts right from your dynamic prompts
 
@@ -26,3 +27,8 @@
   - Through the use of WebSockets, we are able to send the message thread between the user and the AI model to the back-end for processing, and display the messages just like a text conversation
     - The message display has Markdown support, allowing for easy reading of the messages
     - 
+   
+### Quick dev run: 
+- Add `OPENAI_API_KEY` to `.env` file in `server`
+- `cd` to `server` directory and run the Python file `server.py` (will have to `pip install -r requirements.txt`)
+- In another terminal, `cd` to `client` and run `npm run dev` (will have to `npm install`)
