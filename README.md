@@ -4,13 +4,14 @@
 
 ### Notable features
 
+- **Combats context-loss and AI hallucinations**
+  - Heavily limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
+  - Makes use of fine-tuned and prompt-engineered functions to make sure the assistant doesn't spew out random/false data
 - **Accessible data analysis**
   - Upload your CSV file and get instant insights and visualizations from your prompts
   - No coding and/or Excel functions required!
 - **Real-time data analysis**
   - Chat-based interaction allows you to quick adjust your prompts and get feedback
-- **Context-loss combating**
-  - Heavily limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
 - **Data visualization**
   - Get visualizations of your data in the form of graphs and charts right from your dynamic prompts
 
