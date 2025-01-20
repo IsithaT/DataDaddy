@@ -25,3 +25,4 @@
   - The front-end is built using React-TypScript, and the back-end is built using Flask
   - Through the use of WebSockets, we are able to send the message thread between the user and the AI model to the back-end for processing, and display the messages just like a text conversation
     - The message display has Markdown support, allowing for easy reading of the messages
+    - 
