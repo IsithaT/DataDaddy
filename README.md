@@ -10,7 +10,7 @@
 - **Real-time data analysis**
   - Chat-based interaction allows you to quick adjust your prompts and get feedback
 - **Context-loss combating**
-  - Heavily Limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
+  - Heavily limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
 - **Data visualization**
   - Get visualizations of your data in the form of graphs and charts right from your dynamic prompts
 
