@@ -2,6 +2,9 @@
 
 ## AI-powered CSV analysis tool that provides instant insights and visualizations from your data, making data analysis accessible and efficient
 
+![image](https://github.com/user-attachments/assets/daf85350-8e64-4cfd-ba01-7359811b4283)
+![image](https://github.com/user-attachments/assets/242d4480-7b74-4edc-b8d4-a141bf963a4d)
+
 ### Notable features
 
 - **Combats context-loss and AI hallucinations**
@@ -26,7 +29,6 @@
   - The front-end is built using React-TypScript, and the back-end is built using Flask
   - Through the use of WebSockets, we are able to send the message thread between the user and the AI model to the back-end for processing, and display the messages just like a text conversation
     - The message display has Markdown support, allowing for easy reading of the messages
-    - 
    
 ### Quick dev run: 
 - Add `OPENAI_API_KEY` to `.env` file in `server`
