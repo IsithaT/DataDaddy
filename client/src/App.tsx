@@ -75,7 +75,7 @@ export default function App() {
       
       {!isValidKey ? (
         
-        <div className="flex items-center justify-center flex-col gap-12 p-4 h-[75vh]">
+        <div className="flex items-center justify-center flex-col gap-12 p-4 min-h-[75vh]">
           <h1 className="md:text-[3em] text-[1.8rem] leading-[1.1] text-excel-900">
             {config.assistant.name + ": CSV Analyzing Assistant"}
           </h1>
