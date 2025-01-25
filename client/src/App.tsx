@@ -108,13 +108,13 @@ export default function App() {
                   {isValidating ? 'Validating...' : 'Submit API Key'}
                 </button>
                 <p className="mt-4 text-sm text-[#184432] text-center">
-                  Your API key is stored locally and never sent to our servers directly.
+                  Your API key is stored locally and securely transmitted to our server through an encrypted WebSocket connection.
                 </p>
               </form>
             </div>
             <p className="text-sm">
-              Your OpenAI API key is required for direct communication with OpenAI's services.
-              This gives you control over API usage and costs.
+              Your OpenAI API key is required to process your requests. The key is stored locally 
+              and transmitted securely to handle your analysis requests.
               You can get your API key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2b9d6a] hover:text-[#217f55] underline">OpenAI platform</a>.
             </p>
           </div>
