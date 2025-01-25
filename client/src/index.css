@@ -49,15 +49,18 @@
   button:not([class]):focus-visible {
     outline: 4px auto #7ed3aa;
   }
+  h1 {
+    @apply text-lg md:text-xl leading-[1.1] text-excel-900 font-bold;
+  }
 }
 
 @layer utilities {
   body {
-    @apply m-0 min-w-[320px] min-h-screen bg-[#f5f7f5];
+    @apply m-0 min-w-[320px] min-h-screen bg-[#f5f7f5] ;
   }
 
   h1 {
-    @apply text-[3.2em] leading-[1.1] text-excel-900 font-bold;
+    @apply text-lg md:text-xl leading-[1.1] text-excel-900 font-bold;
   }
 
   .text-excel-600 {

@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from functioncalls import *
+from flask_cors import CORS
 from llm import (
-    load_api_key,
     initialize_client,
     create_assistant,
     create_thread,
@@ -15,18 +15,52 @@ import time
 from PIL import Image
 from io import BytesIO
 import base64
+import os
 
 # Base instructions for the assistant
 BASE_INSTRUCTIONS = """You are a data analysis agent with access only to CSV headers and one sample row. Never attempt to access full data directly - use provided analysis tools instead. If a function returns an error, stop using it and try alternatives. If that doesn't work, just suggest alternatives. Always verify data types before analysis and clearly state any limitations."""
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "secret!"
-socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Initialize OpenAI client and assistant
-api_key = load_api_key()
-client = initialize_client(api_key)
-assistant = create_assistant(client)
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*", )
+
+
+# Store API keys and OpenAI clients per session
+client_api_keys = {}
+client_instances = {}
+
+
+@socketio.on("set_api_key")
+def handle_api_key(api_key):
+    try:
+        # Initialize client with the provided API key
+        global client
+        client = initialize_client(api_key)
+        global assistant
+        assistant = create_assistant(client)
+
+        # Store both API key and client instance
+        client_api_keys[request.sid] = api_key
+        client_instances[request.sid] = {"client": client, "assistant": assistant}
+        emit("connection_status", {"connected": True})
+    except Exception as e:
+        emit("error", {"msg": f"Invalid API key: {str(e)}"})
+        emit("connection_status", {"connected": False})
+
+
+@socketio.on("disconnect")
+def handle_disconnect():
+    """
+    Handles client disconnections from the WebSocket server.
+    Logs when a client terminates their connection.
+    """
+    print("Client disconnected")
+    if request.sid in client_api_keys:
+        del client_api_keys[request.sid]
+    if request.sid in client_instances:
+        del client_instances[request.sid]
+
 
 # Store active thread information
 active_threads = {}
@@ -39,15 +73,6 @@ def handle_connect():
     Logs when a new client establishes a connection.
     """
     print("Client connected")
-
-
-@socketio.on("disconnect")
-def handle_disconnect():
-    """
-    Handles client disconnections from the WebSocket server.
-    Logs when a client terminates their connection.
-    """
-    print("Client disconnected")
 
 
 @socketio.on("join_thread")
@@ -91,7 +116,14 @@ def handle_send_message(data):
         emit("error", {"msg": "Missing thread_id or message"})
         return
 
+    if request.sid not in client_instances:
+        emit("error", {"msg": "No valid API key provided"})
+        return
+
     try:
+        client = client_instances[request.sid]["client"]
+        assistant = client_instances[request.sid]["assistant"]
+
         # Send message
         message = send_message(client, thread_id, message_content)
         emit(
@@ -195,9 +227,9 @@ def handle_send_message(data):
                 "thread_id": thread_id,
                 "messages": [
                     {
-                        "role": msg.role, 
+                        "role": msg.role,
                         "content": msg.content[0].text.value,
-                        "timestamp": msg.created_at
+                        "timestamp": msg.created_at,
                     }
                     for msg in messages.data
                 ],
@@ -277,9 +309,13 @@ def handle_send_csv(data):
             {
                 "messages": [
                     {
-                        "role": msg.role, 
+                        "role": msg.role,
                         "content": msg.content[0].text.value,
-                        "timestamp": initial_timestamp if msg.role == 'user' else initial_timestamp + 1
+                        "timestamp": (
+                            initial_timestamp
+                            if msg.role == "user"
+                            else initial_timestamp + 1
+                        ),
                     }
                     for msg in messages.data
                 ]
@@ -328,4 +364,5 @@ def handle_upload_image(data):
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)

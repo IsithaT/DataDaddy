@@ -29,8 +29,39 @@
   - The front-end is built using React-TypScript, and the back-end is built using Flask
   - Through the use of WebSockets, we are able to send the message thread between the user and the AI model to the back-end for processing, and display the messages just like a text conversation
     - The message display has Markdown support, allowing for easy reading of the messages
-   
-### Quick dev run: 
-- Add `OPENAI_API_KEY` to `.env` file in `server`
-- `cd` to `server` directory and run the Python file `server.py` (will have to `pip install -r requirements.txt`)
-- In another terminal, `cd` to `client` and run `npm run dev` (will have to `npm install`)
+
+### Quick dev run:
+
+- `cd` to `server` directory and run `pip install -r requirements.txt`
+- Run the Python file `server.py`
+- In another terminal, `cd` to `client` and run `npm install`
+- Run `npm run dev`
+- When the app loads, enter your OpenAI API key in the provided input field
+
+### Deployment Instructions
+
+#### Server Deployment (Railway)
+
+1. Create a [Railway](https://railway.app/) account
+2. Install Railway CLI: `npm i -g @railway/cli`
+3. Login: `railway login`
+4. Create new project: `railway init`
+5. Deploy: `railway up`
+6. Copy your deployed server URL for client configuration
+
+#### Client Deployment (Vercel)
+1. Create a [Vercel](https://vercel.com/) account
+2. Install Vercel CLI: `npm i -g vercel`
+3. From the client directory:
+   ```bash
+   cd client
+   vercel
+   ```
+4. Set the environment variable in Vercel:
+   - VITE_SERVER_URL=https://your-railway-server-url
+5. Deploy: `vercel --prod`
+
+Your application will be live with:
+- Server running on Railway (free tier includes 500 hours/month)
+- Client hosted on Vercel (unlimited for static sites)
+- Users provide their own OpenAI API keys

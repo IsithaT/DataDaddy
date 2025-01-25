@@ -7,9 +7,7 @@ import {
     MessageReceivedPayload,
     ImageReceivedPayload,
 } from '../types';
-import io from 'socket.io-client';
-
-const socket = io('http://localhost:5001');
+import { socket } from '../utils/socket';
 
 export function useChat() {
     const [context, setContext] = useState<ChatContext>({ messages: [] });
