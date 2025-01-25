@@ -2,18 +2,19 @@ import { useState, useEffect } from 'react';
 import ChatContainer from './components/ChatContainer';
 import { config } from './config';
 import './App.css';
-import { socket } from './utils/socket';
+import { socket, isSocketConnected } from './utils/socket';
 
 export default function App() {
   const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
   const [isValidating, setIsValidating] = useState(false);
   const [isValidKey, setIsValidKey] = useState(false);
   const [error, setError] = useState('');
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const validateApiKey = async (key: string) => {
     setIsValidating(true);
     setError('');
-    
+
     try {
       const response = await fetch('https://api.openai.com/v1/models', {
         headers: {
@@ -23,7 +24,7 @@ export default function App() {
 
       const isValid = response.status === 200;
       setIsValidKey(isValid);
-      
+
       if (isValid) {
         socket.emit('set_api_key', key);
         localStorage.setItem('openai_api_key', key);
@@ -40,22 +41,25 @@ export default function App() {
   };
 
   useEffect(() => {
-    socket.connect();
+    const connectionCheck = setInterval(() => {
+      setSocketConnected(isSocketConnected());
+    }, 1000);
 
     socket.on('connect', () => {
-      console.log('Socket connected');
+      setSocketConnected(true);
       if (apiKey) {
         validateApiKey(apiKey);
       }
     });
 
-    socket.on('connection_status', (status: { connected: boolean }) => {
-      console.log('Connection status:', status.connected);
+    socket.on('disconnect', () => {
+      setSocketConnected(false);
     });
 
     return () => {
+      clearInterval(connectionCheck);
       socket.off('connect');
-      socket.off('connection_status');
+      socket.off('disconnect');
     };
   }, [apiKey]);
 
@@ -70,11 +74,19 @@ export default function App() {
     localStorage.removeItem('openai_api_key');
   };
 
+  const ConnectionStatus = () => (
+
+    <div className={`fixed top-4 right-4 px-4 py-2 rounded-md ${socketConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+      }`}>
+      {socketConnected ? 'Connected' : 'Disconnected'}
+    </div>
+  );
+
   return (
     <div className="bg-[#f5f7f5]">
-      
+      <ConnectionStatus />
       {!isValidKey ? (
-        
+
         <div className="flex items-center justify-center flex-col gap-12 p-4 min-h-[75vh]">
           <h1 className="md:text-[3em] text-[1.8rem] leading-[1.1] text-excel-900">
             {config.assistant.name + ": CSV Analyzing Assistant"}
@@ -94,6 +106,7 @@ export default function App() {
                     className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2
                       ${error ? 'border-red-500 focus:ring-red-200' : 'border-excel-300 focus:ring-[#7ed3aa]'}`}
                     disabled={isValidating}
+                    autoComplete="off"
                   />
                   {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
                 </div>
@@ -113,7 +126,7 @@ export default function App() {
               </form>
             </div>
             <p className="text-sm">
-              Your OpenAI API key is required to process your requests. The key is stored locally 
+              Your OpenAI API key is required to process your requests. The key is stored locally
               and transmitted securely to handle your analysis requests.
               You can get your API key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2b9d6a] hover:text-[#217f55] underline">OpenAI platform</a>.
             </p>
@@ -125,7 +138,7 @@ export default function App() {
       ) : (
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8 md:flex-row flex-col gap-4">
-              <h1 className="md:text-[3em] text-[1.8rem] leading-[1.1] text-excel-900">
+            <h1 className="md:text-[3em] text-[1.8rem] leading-[1.1] text-excel-900">
               {config.assistant.name + ": CSV Analyzing Assistant"}
             </h1>
             <button

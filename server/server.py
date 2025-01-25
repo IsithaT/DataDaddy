@@ -23,7 +23,12 @@ BASE_INSTRUCTIONS = """You are a data analysis agent with access only to CSV hea
 app = Flask(__name__)
 
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", )
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    transports=["polling", "websocket"],
+    always_connect=True,
+)
 
 
 # Store API keys and OpenAI clients per session
