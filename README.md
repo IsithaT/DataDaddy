@@ -1,67 +1,77 @@
-# Data Dave
+# Data Dave: AI-Powered CSV Analysis
 
-## AI-powered CSV analysis tool that provides instant insights and visualizations from your data, making data analysis accessible and efficient
+Data Dave is your AI assistant for analyzing CSV files - no coding or Excel expertise required! Simply upload your CSV and ask questions in plain English to get instant insights and visualizations.
 
-![image](https://github.com/user-attachments/assets/daf85350-8e64-4cfd-ba01-7359811b4283)
-![image](https://github.com/user-attachments/assets/242d4480-7b74-4edc-b8d4-a141bf963a4d)
+![Data Dave Interface](https://github.com/user-attachments/assets/daf85350-8e64-4cfd-ba01-7359811b4283)
 
-### Notable features
+## 🚀 Getting Started
 
-- **Combats context-loss and AI hallucinations**
-  - Heavily limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
-  - Makes use of fine-tuned and prompt-engineered functions to make sure the assistant doesn't spew out random/false data
-- **Accessible, code-free data analysis**
-  - Upload your CSV file and get instant insights and visualizations from your prompts
-  - No coding and/or Excel knowledge required!
-- **Real-time data analysis**
-  - Chat-based interaction allows you to quick adjust your prompts and get feedback
-- **Data visualization**
-  - Get visualizations of your data in the form of graphs and charts right from your dynamic prompts
+1. Visit [Data Dave](https://datadave.colemanlai.com)
+2. Get your [OpenAI API key](https://platform.openai.com/api-keys)
+3. Upload your CSV file
+4. Start asking questions!
 
-### How it works
+## 💡 Example Questions
 
-- **Function calling**
-  - The LLM is given a set of fine-tuned, prompt-engineered functions that allow it to analyze the data in a way that is both accurate and contextually aware
-  - It is able to choose which functions to use based on the context it is given
-- **WebSockets**
-  - Data is communicated between the front-end and the back-end using WebSockets, allowing for both text and image data to be sent
-- **Client-server communication**
-  - The front-end is built using React-TypScript, and the back-end is built using Flask
-  - Through the use of WebSockets, we are able to send the message thread between the user and the AI model to the back-end for processing, and display the messages just like a text conversation
-    - The message display has Markdown support, allowing for easy reading of the messages
+- "What's the average value in column X?"
+- "Create a bar graph showing the distribution of Y"
+- "Find any correlations between columns A and B"
+- "Show me a pie chart of categories in column Z"
+- "What are the top 5 values in column N?"
 
-### Quick dev run:
+## ✨ Features
 
-- `cd` to `server` directory and run `pip install -r requirements.txt`
-- Run the Python file `server.py`
-- In another terminal, `cd` to `client` and run `npm install`
-- Run `npm run dev`
-- When the app loads, enter your OpenAI API key in the provided input field
+### Combats AI Context Loss and Hallucinations
 
-### Deployment Instructions
+- Heavily limits the data fed directly to the LLM to prevent context loss while still providing fully accurate analysis
+- Makes use of fine-tuned and prompt-engineered functions to make sure the assistant doesn't spew out random/false data
+- Maintains conversation context for follow-up questions
 
-#### Server Deployment (Railway)
+### Powerful Visualizations
 
-1. Create a [Railway](https://railway.app/) account
-2. Install Railway CLI: `npm i -g @railway/cli`
-3. Login: `railway login`
-4. Create new project: `railway init`
-5. Deploy: `railway up`
-6. Copy your deployed server URL for client configuration
+- Bar graphs
+- Pie charts
+- Histograms
+- Correlation plots
+- Custom charts based on your needs
 
-#### Client Deployment (Vercel)
-1. Create a [Vercel](https://vercel.com/) account
-2. Install Vercel CLI: `npm i -g vercel`
-3. From the client directory:
+### User-Friendly Interface
+
+- Chat-based interaction
+- Real-time responses
+- Markdown support for clear explanations
+- Direct visualizations in chat
+
+### Privacy & Security
+
+- Your data stays in your browser
+- API key transmitted securely via WebSocket
+- No data permanently stored on servers
+
+## 🛠️ Local Development
+
+To run Data Dave locally:
+
+1. Clone the repository
+2. Set up the server:
+   ```bash
+   cd server
+   pip install -r requirements.txt
+   python server.py
+   ```
+3. Set up the client:
    ```bash
    cd client
-   vercel
+   npm install
+   npm run dev
    ```
-4. Set the environment variable in Vercel:
-   - VITE_SERVER_URL=https://your-railway-server-url
-5. Deploy: `vercel --prod`
+4. Open the provided local URL
+5. Enter your OpenAI API key to begin
 
-Your application will be live with:
-- Server running on Railway (free tier includes 500 hours/month)
-- Client hosted on Vercel (unlimited for static sites)
-- Users provide their own OpenAI API keys
+## 📝 Contributing
+
+We welcome contributions! 
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

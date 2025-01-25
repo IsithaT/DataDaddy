@@ -117,6 +117,9 @@ export default function App() {
               and transmitted securely to handle your analysis requests.
               You can get your API key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-[#2b9d6a] hover:text-[#217f55] underline">OpenAI platform</a>.
             </p>
+            <p className="text-sm text-gray-600">
+              View this project on <a href="https://github.com/IsithaT/DataDave" target="_blank" rel="noopener noreferrer" className="text-[#2b9d6a] hover:text-[#217f55] underline">GitHub</a>
+            </p>
           </div>
         </div>
       ) : (
