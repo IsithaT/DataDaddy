@@ -3,6 +3,7 @@ import ChatContainer from './components/ChatContainer';
 import { config } from './config';
 import './App.css';
 import { socket, isSocketConnected } from './utils/socket';
+import { Analytics } from "@vercel/analytics/react"
 
 export default function App() {
   const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
@@ -143,7 +144,7 @@ export default function App() {
             </h1>
             <button
               onClick={handleChangeApiKey}
-              className="md:px-4 md:py-2 md:text-base text-xs px-2 py-1 rounded-md border border-[#4ab785] bg-[#2b9d6a] hover:bg-[#217f55] hover:border-[#217f55] text-white font-medium transition-colors duration-200"
+              className="md:px-4 md:py-2 md:text-base text-xs px-2 py-1 rounded-md border border-[#4ab785] bg-[#2b9d6a] hover:bg-[#217f55] hover:border-[#217f55] text-white font-medium transition-colors duration-200 z-[100]" 
             >
               Change API Key
             </button>
@@ -151,6 +152,7 @@ export default function App() {
           <ChatContainer />
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
